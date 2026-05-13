@@ -15,19 +15,18 @@ public class Usuario
     
     public DateTime createdAt{get;set;}
 
-    public Usuario(string username, string name, string email)
+    public Usuario(string username, string name)
     {
         this.username = username;
         this.name = name;
-        this.email = email;
         createdAt = DateTime.Now;
     }
-    public Usuario(int id, string username, string name, string email, DateTime createdAt)
+    public Usuario(int id, string username, string name, DateTime createdAt)
     {
         this.id = id;
         this.username = username;
         this.name = name;
-        this.email = email;
         this.createdAt = createdAt;
     }
+    
 }

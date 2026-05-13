@@ -1,0 +1,1 @@
+/home/alejo/Descargas/pgsql 9.6x64/pgsql/bin/postgres "-D" "./data"

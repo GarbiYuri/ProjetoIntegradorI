@@ -1,0 +1,12 @@
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/bin/Debug/net10.0/Exceptions.deps.json
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/bin/Debug/net10.0/Exceptions.dll
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/bin/Debug/net10.0/Exceptions.pdb
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/Exceptions.GeneratedMSBuildEditorConfig.editorconfig
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/Exceptions.AssemblyInfoInputs.cache
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/Exceptions.AssemblyInfo.cs
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/Exceptions.csproj.CoreCompileInputs.cache
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/Exceptions.sourcelink.json
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/Exceptions.dll
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/refint/Exceptions.dll
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/Exceptions.pdb
+/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/obj/Debug/net10.0/ref/Exceptions.dll

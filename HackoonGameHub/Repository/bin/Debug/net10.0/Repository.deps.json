@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v10.0": {
       "Repository/1.0.0": {
         "dependencies": {
+          "Exceptions": "1.0.0",
           "Models": "1.0.0",
           "Npgsql": "10.0.2"
         },
@@ -42,6 +43,14 @@
           "lib/net10.0/Npgsql.dll": {
             "assemblyVersion": "10.0.2.0",
             "fileVersion": "10.0.2.0"
+          }
+        }
+      },
+      "Exceptions/1.0.0": {
+        "runtime": {
+          "Exceptions.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
           }
         }
       },
@@ -81,6 +90,11 @@
       "sha512": "sha512-q5RfBI+wywJSFUNDE1L4ZbHEHCFTblo8Uf6A6oe4feOUFYiUQXyAf9GBh5qEZpvJaHiEbpBPkQumjEhXCJxdrg==",
       "path": "npgsql/10.0.2",
       "hashPath": "npgsql.10.0.2.nupkg.sha512"
+    },
+    "Exceptions/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "Models/1.0.0": {
       "type": "project",

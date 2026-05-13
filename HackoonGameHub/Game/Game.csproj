@@ -6,4 +6,18 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="pgsql\" />
+      <Folder Include="pgsql\data\pg_commit_ts\" />
+      <Folder Include="pgsql\data\pg_dynshmem\" />
+      <Folder Include="pgsql\data\pg_logical\mappings\" />
+      <Folder Include="pgsql\data\pg_logical\snapshots\" />
+      <Folder Include="pgsql\data\pg_replslot\" />
+      <Folder Include="pgsql\data\pg_serial\" />
+      <Folder Include="pgsql\data\pg_snapshots\" />
+      <Folder Include="pgsql\data\pg_stat_tmp\" />
+      <Folder Include="pgsql\data\pg_tblspc\" />
+      <Folder Include="pgsql\data\pg_twophase\" />
+    </ItemGroup>
+
 </Project>
