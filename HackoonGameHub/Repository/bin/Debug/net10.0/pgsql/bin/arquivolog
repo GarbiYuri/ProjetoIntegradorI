@@ -1,0 +1,182 @@
+2026-05-14 02:30:57.972 -03 [5264] LOG:  starting PostgreSQL 18.3 on x86_64-windows, compiled by msvc-19.44.35223, 64-bit
+2026-05-14 02:30:57.976 -03 [5264] LOG:  listening on IPv6 address "::1", port 5432
+2026-05-14 02:30:57.976 -03 [5264] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-05-14 02:30:58.029 -03 [8388] LOG:  database system was shut down at 2026-05-14 02:30:46 -03
+2026-05-14 02:30:58.038 -03 [5264] LOG:  database system is ready to accept connections
+2026-05-14 02:31:03.480 -03 [5264] LOG:  background worker "logical replication launcher" (PID 4464) was terminated by exception 0xC000013A
+2026-05-14 02:31:03.480 -03 [5264] HINT:  See C include file "ntstatus.h" for a description of the hexadecimal value.
+2026-05-14 02:31:03.480 -03 [5264] LOG:  terminating any other active server processes
+2026-05-14 02:31:03.483 -03 [5264] LOG:  received fast shutdown request
+^C2026-05-14 02:33:28.587 -03 [11580] LOG:  starting PostgreSQL 18.3 on x86_64-windows, compiled by msvc-19.44.35223, 64-bit
+2026-05-14 02:33:28.590 -03 [11580] LOG:  listening on IPv6 address "::1", port 5432
+2026-05-14 02:33:28.590 -03 [11580] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-05-14 02:33:28.645 -03 [8744] LOG:  database system was shut down at 2026-05-14 02:33:18 -03
+2026-05-14 02:33:28.653 -03 [11580] LOG:  database system is ready to accept connections
+2026-05-14 02:34:05.731 -03 [9168] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-05-14 02:38:28.762 -03 [3416] LOG:  checkpoint starting: time
+2026-05-14 02:38:41.157 -03 [3416] LOG:  checkpoint complete: wrote 112 buffers (0.7%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=12.251 s, sync=0.127 s, total=12.395 s; sync files=63, longest=0.005 s, average=0.003 s; distance=591 kB, estimate=591 kB; lsn=0/1880270, redo lsn=0/18801E0
+2026-05-14 16:05:25.123 -03 [9092] LOG:  iniciando PostgreSQL 18.3 on x86_64-windows, compiled by msvc-19.44.35223, 64-bit
+2026-05-14 16:05:25.127 -03 [9092] LOG:  escutando no endereço IPv6 "::1", porta 5432
+2026-05-14 16:05:25.127 -03 [9092] LOG:  escutando no endereço IPv4 "127.0.0.1", porta 5432
+2026-05-14 16:05:25.314 -03 [11560] LOG:  sistema de banco de dados foi desligado em 2026-05-14 16:05:13 -03
+2026-05-14 16:05:25.323 -03 [9092] LOG:  sistema de banco de dados está pronto para aceitar conexões
+2026-05-14 16:08:10.329 -03 [12788] LOG:  nÃ£o foi possÃ­vel receber dados do cliente: An existing connection was forcibly closed by the remote host.
+	
+2026-05-14 16:10:25.210 -03 [3288] LOG:  checkpoint starting: time
+2026-05-14 16:10:37.550 -03 [3288] LOG:  checkpoint complete: wrote 112 buffers (0.7%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=12.195 s, sync=0.131 s, total=12.342 s; sync files=63, longest=0.005 s, average=0.003 s; distance=591 kB, estimate=591 kB; lsn=0/18806B8, redo lsn=0/1880628
+2026-05-14 16:11:55.426 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:11:56.437 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:11:57.441 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:11:57.799 GMT [9780] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:11:57.890 GMT [5544] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:11:58.444 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:11:58.942 GMT [11524] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:11:58.968 GMT [4780] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:11:59.446 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:12:00.113 GMT [12360] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:12:00.137 GMT [13212] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:12:00.452 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:12:01.170 GMT [5776] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:12:01.192 GMT [944] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:12:01.466 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:12:02.232 GMT [12332] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:12:02.257 GMT [12324] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:12:02.481 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:03.495 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:04.496 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:05.497 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:06.511 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:07.524 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:08.533 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:09.536 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:10.545 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:11.549 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:12.564 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:13.565 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:14.571 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:15.583 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:16.598 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:17.603 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:18.605 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:19.620 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:20.626 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:21.631 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:22.633 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:23.637 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:24.651 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:25.655 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:26.659 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:27.664 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:28.664 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:29.672 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:30.681 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:31.685 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:32.690 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:33.693 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:34.695 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:35.697 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:36.710 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:37.718 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:38.719 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:39.724 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:40.729 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:41.740 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:42.751 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:43.762 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:44.774 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:45.787 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:46.792 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:47.807 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:48.812 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:49.817 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:50.832 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:51.840 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:52.844 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:53.857 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:54.869 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:55.871 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:56.884 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:57.884 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:58.893 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:12:59.894 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:00.900 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:01.914 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:02.272 -03 [9092] LOG:  não foi possível abrir o arquivo "postmaster.pid": Bad file descriptor; continuando mesmo assim
+2026-05-14 16:13:02.924 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:03.931 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:04.942 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:05.955 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:06.966 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:07.979 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:08.983 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:10.009 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:11.016 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:12.017 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:13.023 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:14.027 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:15.040 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:16.042 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:17.053 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:18.055 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:19.070 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:20.081 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:21.090 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:22.092 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:23.092 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:24.095 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:25.098 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:26.102 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:27.117 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:28.132 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:29.139 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:30.151 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:31.162 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:32.174 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:33.188 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:34.189 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:35.194 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:36.194 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:37.195 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:38.208 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:39.223 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:40.238 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:41.252 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:42.260 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:43.262 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:44.263 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:45.263 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:13:45.854 GMT [13024] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:13:45.930 GMT [13148] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:13:46.265 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:13:46.987 GMT [3944] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:13:47.013 GMT [7588] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:13:47.278 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:13:48.055 GMT [9084] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:13:48.083 GMT [7580] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:13:48.279 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:13:49.113 GMT [9504] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:13:49.137 GMT [1768] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:13:49.294 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:13:50.182 GMT [12684] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:13:50.203 GMT [8524] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:13:50.299 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 19:13:51.231 GMT [10076] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 19:13:51.255 GMT [12552] FATAL:  diretório de dados "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/pgsql/pgsql/data" não existe
+2026-05-14 16:13:51.305 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:52.308 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:53.316 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:54.318 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:55.325 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:56.340 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:57.344 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:58.357 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:13:59.363 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:14:00.363 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:14:01.376 -03 [3844] ERRO:  não foi possível posicionar no fim do arquivo "global/1262": Bad file descriptor
+2026-05-14 16:14:01.931 -03 [9092] LOG:  processo trabalhador em segundo plano "logical replication launcher" (PID 1644) terminou com código de retorno 1
+2026-05-14 16:14:01.931 -03 [9092] LOG:  terminando quaisquer outros processos servidor ativos
+2026-05-14 16:14:01.937 -03 [9092] LOG:  todos os processos servidor foram terminados; reinicializando
+2026-05-14 16:14:01.938 -03 [9092] LOG:  não foi possível abrir diretório "base": No such file or directory
+2026-05-14 16:14:01.938 -03 [9092] LOG:  não foi possível abrir diretório "pg_tblspc": No such file or directory
+2026-05-14 16:14:01.940 -03 [9092] PÂNICO:  não foi possível abrir o arquivo "global/pg_control": Bad file descriptor
