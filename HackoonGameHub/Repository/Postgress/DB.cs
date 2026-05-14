@@ -13,7 +13,7 @@ public class DB
     //Funcão deve rodar apenas uma vez ao inciar o game e TEM QUE DAR CERTO
     public static async Task connect()
     {
-        var connectionString = "Host=127.0.0.1;Port=5432;Username=postgres;Database=postgres;Password="; // login do banco e local doo banco na rede
+        var connectionString = "Host=127.0.0.1;Port=5432;Username=postgres;Database=postgres;Password=root1234"; // login do banco e local doo banco na rede
         dataSource = NpgsqlDataSource.Create(connectionString); // Inicializa a conexão
         
         while (!conectado)
@@ -81,9 +81,16 @@ public class DB
         // No seu caso, a pasta de binários do Windows (winPG)
         string pgsqlPath = Path.Combine(baseDir, "pgsql"); 
         string pgctlPath = Path.Combine(pgsqlPath, "bin", "pg_ctl.exe");
+        string binPath = Path.Combine(pgsqlPath, "bin");
         string dataPath = Path.Combine(pgsqlPath, "data");
         string logPath = Path.Combine(pgsqlPath, "logfile");
         string sharePath = Path.Combine(pgsqlPath, "share");
+        
+        if (!File.Exists(Path.Combine(dataPath, "PG_VERSION")))
+        {
+            Console.WriteLine("Banco de dados não detectado. Inicializando...");
+            InitializeDatabase(binPath, dataPath);
+        }
         
         string[] folders = { "pg_tblspc", "pg_replslot", "pg_snapshots", "pg_commit_ts" };
         foreach (var folder in folders)
@@ -110,6 +117,31 @@ public class DB
         catch (Exception ex)
         {
             Console.WriteLine("Erro ao iniciar no Windows: " + ex.Message);
+        }
+    }
+    public static void InitializeDatabase(string binPath, string dataPath)
+    {
+        // Para não pedir senha no terminal (o que travaria o app), 
+        // usamos o método de autenticação 'trust' temporariamente ou um arquivo de senha.
+        // Aqui usamos '-A trust' para facilitar o primeiro acesso, depois você altera.
+    
+        ProcessStartInfo initPsi = new ProcessStartInfo
+        {
+            FileName = Path.Combine(binPath, "initdb.exe"),
+            // -A trust permite conectar sem senha inicialmente para configurar o banco
+            Arguments = $"-D \"{dataPath}\" -U postgres --encoding=UTF8 --locale=Portuguese_Brazil -A trust",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = binPath
+        };
+
+        using (Process proc = Process.Start(initPsi))
+        {
+            proc.WaitForExit();
+            if (proc.ExitCode == 0)
+                Console.WriteLine("InitDB concluído com sucesso.");
+            else
+                throw new Exception($"InitDB falhou com código {proc.ExitCode}");
         }
     }
 }
