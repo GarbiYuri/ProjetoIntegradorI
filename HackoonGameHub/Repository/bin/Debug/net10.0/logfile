@@ -1,168 +1,24 @@
-LOG:  could not bind IPv4 socket: EndereÃ§o jÃ¡ em uso
-HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
-LOG:  could not bind IPv6 socket: EndereÃ§o jÃ¡ em uso
-HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
-WARNING:  could not create listen socket for "*"
-FATAL:  could not create any TCP/IP sockets
-LOG:  database system is shut down
-LOG:  could not open file "postmaster.pid": Arquivo ou diretÃ³rio inexistente
-LOG:  performing immediate shutdown because data directory lock file is invalid
-LOG:  received immediate shutdown request
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-LOG:  database system is shut down
-LOG:  database system was interrupted; last known up at 2026-05-13 21:31:01 COT
-LOG:  database system was not properly shut down; automatic recovery in progress
-LOG:  redo starts at 0/1577C78
-LOG:  invalid record length at 0/15782B8: wanted 24, got 0
-LOG:  redo done at 0/1578290
-LOG:  last completed transaction was at log time 2026-05-13 21:31:35.741406-05
-LOG:  MultiXact member wraparound protections are now enabled
-LOG:  database system is ready to accept connections
-LOG:  autovacuum launcher started
-ERROR:  duplicate key value violates unique constraint "usuarios_username_key"
-DETAIL:  Key (username)=(Franii) already exists.
-STATEMENT:  INSERT INTO usuarios (username, name, email, id_sala, password, created_at) values ($1, $2, $3, $4, $5, $6) returning id;
-LOG:  received SIGHUP, reloading configuration files
-ERROR:  unrecognized configuration parameter "databases"
-STATEMENT:  show databases;
-ERROR:  column "postgres" does not exist at character 8
-STATEMENT:  select postgres
-	;
-ERROR:  column "games" does not exist at character 8
-STATEMENT:  select Games;
-ERROR:  syntax error at or near "use" at character 1
-STATEMENT:  use Games
-	;
-ERROR:  syntax error at or near "use" at character 1
-STATEMENT:  use Games
-	;
-LOG:  could not bind IPv4 socket: EndereÃ§o jÃ¡ em uso
-HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
-LOG:  could not bind IPv6 socket: EndereÃ§o jÃ¡ em uso
-HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
-WARNING:  could not create listen socket for "*"
-FATAL:  could not create any TCP/IP sockets
-LOG:  database system is shut down
-LOG:  could not open file "postmaster.pid": Arquivo ou diretÃ³rio inexistente
-LOG:  performing immediate shutdown because data directory lock file is invalid
-LOG:  received immediate shutdown request
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-LOG:  database system is shut down
-LOG:  database system was interrupted; last known up at 2026-05-13 21:33:13 COT
-LOG:  database system was not properly shut down; automatic recovery in progress
-LOG:  redo starts at 0/1578328
-LOG:  invalid record length at 0/157E268: wanted 24, got 0
-LOG:  redo done at 0/157E240
-LOG:  last completed transaction was at log time 2026-05-13 21:38:06.232607-05
-FATAL:  the database system is starting up
-LOG:  MultiXact member wraparound protections are now enabled
-LOG:  autovacuum launcher started
-LOG:  database system is ready to accept connections
-FATAL:  the database system is starting up
-LOG:  received SIGHUP, reloading configuration files
-LOG:  could not bind IPv4 socket: EndereÃ§o jÃ¡ em uso
-HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
-LOG:  could not bind IPv6 socket: EndereÃ§o jÃ¡ em uso
-HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
-WARNING:  could not create listen socket for "*"
-FATAL:  could not create any TCP/IP sockets
-LOG:  database system is shut down
-LOG:  could not open file "postmaster.pid": Arquivo ou diretÃ³rio inexistente
-LOG:  performing immediate shutdown because data directory lock file is invalid
-LOG:  received immediate shutdown request
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-LOG:  database system is shut down
-LOG:  database system was interrupted; last known up at 2026-05-13 21:38:16 COT
-LOG:  database system was not properly shut down; automatic recovery in progress
-LOG:  redo starts at 0/157E2D8
-LOG:  invalid record length at 0/1584848: wanted 24, got 0
-LOG:  redo done at 0/1584820
-LOG:  last completed transaction was at log time 2026-05-13 21:42:16.423315-05
-FATAL:  the database system is starting up
-LOG:  MultiXact member wraparound protections are now enabled
-LOG:  autovacuum launcher started
-LOG:  database system is ready to accept connections
-LOG:  received SIGHUP, reloading configuration files
-ERROR:  duplicate key value violates unique constraint "usuarios_username_key"
-DETAIL:  Key (username)=(Fran) already exists.
-STATEMENT:  INSERT INTO usuarios (username, name, email, id_sala, password, created_at) values ($1, $2, $3, $4, $5, $6) returning id;
-ERROR:  duplicate key value violates unique constraint "usuarios_username_key"
-DETAIL:  Key (username)=(francisco) already exists.
-STATEMENT:  INSERT INTO usuarios (username, name, email, id_sala, password, created_at) values ($1, $2, $3, $4, $5, $6) returning id;
-LOG:  could not bind IPv4 socket: EndereÃ§o jÃ¡ em uso
-HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
-LOG:  could not bind IPv6 socket: EndereÃ§o jÃ¡ em uso
-HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
-WARNING:  could not create listen socket for "*"
-FATAL:  could not create any TCP/IP sockets
-LOG:  database system is shut down
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-FATAL:  database "Game" does not exist
-ERROR:  duplicate key value violates unique constraint "usuarios_username_key"
-DETAIL:  Key (username)=(francisco) already exists.
-STATEMENT:  INSERT INTO usuarios (username, name, email, id_sala, password, created_at) values ($1, $2, $3, $4, $5, $6) returning id;
-LOG:  lock file "postmaster.pid" contains wrong PID: 70120 instead of 100734
-LOG:  performing immediate shutdown because data directory lock file is invalid
-LOG:  received immediate shutdown request
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-WARNING:  terminating connection because of crash of another server process
-DETAIL:  The postmaster has commanded this server process to roll back the current transaction and exit, because another server process exited abnormally and possibly corrupted shared memory.
-HINT:  In a moment you should be able to reconnect to the database and repeat your command.
-LOG:  database system is shut down
-LOG:  database system was interrupted; last known up at 2026-05-13 21:42:33 COT
-LOG:  database system was not properly shut down; automatic recovery in progress
-LOG:  redo starts at 0/15848B8
-LOG:  invalid record length at 0/158BC48: wanted 24, got 0
-LOG:  redo done at 0/158BC20
-LOG:  last completed transaction was at log time 2026-05-13 21:46:16.698568-05
-FATAL:  the database system is starting up
-LOG:  MultiXact member wraparound protections are now enabled
-LOG:  autovacuum launcher started
-LOG:  database system is ready to accept connections
-ERROR:  duplicate key value violates unique constraint "usuarios_username_key"
-DETAIL:  Key (username)=(francisco) already exists.
-STATEMENT:  INSERT INTO usuarios (username, name, email, id_sala, password, created_at) values ($1, $2, $3, $4, $5, $6) returning id;
-LOG:  received SIGHUP, reloading configuration files
-LOG:  database system was interrupted; last known up at 2026-05-13 21:58:29 COT
-LOG:  database system was not properly shut down; automatic recovery in progress
-LOG:  invalid record length at 0/158C5D0: wanted 24, got 0
-LOG:  redo is not required
-FATAL:  the database system is starting up
-LOG:  MultiXact member wraparound protections are now enabled
-LOG:  database system is ready to accept connections
-LOG:  autovacuum launcher started
-LOG:  received SIGHUP, reloading configuration files
+2026-05-14 03:25:34.104 GMT [1512] LOG:  could not open directory "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/Repository/bin/Debug/net10.0/winPG/share/timezone": No such file or directory
+2026-05-13 22:25:34.125 COT [1512] FATAL:  could not open directory "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/Repository/bin/Debug/net10.0/winPG/share/timezonesets": No such file or directory
+2026-05-13 22:25:34.125 COT [1512] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/Repository/bin/Debug/net10.0/winPG/bin/postgres.exe" has been moved away from its proper location.
+2026-05-13 22:28:40.271 COT [8048] FATAL:  database files are incompatible with server
+2026-05-13 22:28:40.271 COT [8048] DETAIL:  The data directory was initialized by PostgreSQL version 9.6, which is not compatible with this version 18.3.
+2026-05-14 03:34:58.720 GMT [7124] LOG:  valor inválido para o parâmetro "dynamic_shared_memory_type": "posix"
+2026-05-14 03:34:58.720 GMT [7124] DICA:  Available values: windows.
+2026-05-13 22:34:58.770 COT [7124] FATAL:  el archivo de configuración «C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/Repository/bin/Debug/net10.0/data/postgresql.conf» contiene errores
+2026-05-13 22:35:45.696 COT [4912] FATAL:  los archivos de base de datos son incompatibles con el servidor
+2026-05-13 22:35:45.696 COT [4912] DETALLE:  El directorio de datos fue inicializado por PostgreSQL versión 9.6, que no es compatible con esta versión 18.3.
+LOG:  valor no válido para el parámetro «lc_monetary»: «es_CO.UTF-8»
+LOG:  valor no válido para el parámetro «lc_numeric»: «es_CO.UTF-8»
+LOG:  valor no válido para el parámetro «lc_time»: «es_CO.UTF-8»
+FATAL:  el archivo de configuración «C:/Users/Administrator/Documents/ProjetoIntegradorI/HackoonGameHub/Repository/bin/Debug/net10.0/data/postgresql.conf» contiene errores
+LOG:  el sistema de bases de datos fue apagado en 2017-04-28 22:34:40 COT
+LOG:  las protecciones de reciclaje de miembros de multixact están habilitadas
+LOG:  el sistema de bases de datos está listo para aceptar conexiones
+LOG:  lanzador de autovacuum iniciado
+FATAL:  el protocolo 1234.5680 no está soportado: servidor soporta 1.0 hasta 3.0
+LOG:  no se pudo recibir datos del cliente: An existing connection was forcibly closed by the remote host.
+	
+FATAL:  el protocolo 1234.5680 no está soportado: servidor soporta 1.0 hasta 3.0
+LOG:  no se pudo recibir datos del cliente: An existing connection was forcibly closed by the remote host.
+	

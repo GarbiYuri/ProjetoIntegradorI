@@ -122,12 +122,8 @@ public class DB
         string pgctlPath = Path.Combine(pgsqlPath, "bin", "pg_ctl.exe");
         string dataPath = Path.Combine(baseDir, "data");
         string logPath = Path.Combine(baseDir, "logfile");
-
-        // No Windows, NÃO usamos chmod.
-        // O Windows gerencia permissões via ACLs, que geralmente já permitem 
-        // a execução se a pasta foi criada pelo usuário atual.
-
-        // 1. Garante que subpastas essenciais existam (Igual ao Linux)
+        string sharePath = Path.Combine(baseDir, "share", "postgresql");
+        
         string[] folders = { "pg_tblspc", "pg_replslot", "pg_snapshots", "pg_commit_ts" };
         foreach (var folder in folders)
         {

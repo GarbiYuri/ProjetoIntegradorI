@@ -217,35 +217,37 @@
     ]
   },
   "packageFolders": {
-    "/home/francisco/.nuget/packages/": {}
+    "C:\\Users\\Administrator\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/francisco/ProjetoIntegradorI/HackoonGameHub/Repository/Repository.csproj",
+      "projectUniqueName": "C:\\Users\\Administrator\\Documents\\ProjetoIntegradorI\\HackoonGameHub\\Repository\\Repository.csproj",
       "projectName": "Repository",
-      "projectPath": "/home/francisco/ProjetoIntegradorI/HackoonGameHub/Repository/Repository.csproj",
-      "packagesPath": "/home/francisco/.nuget/packages/",
-      "outputPath": "/home/francisco/ProjetoIntegradorI/HackoonGameHub/Repository/obj/",
+      "projectPath": "C:\\Users\\Administrator\\Documents\\ProjetoIntegradorI\\HackoonGameHub\\Repository\\Repository.csproj",
+      "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Administrator\\Documents\\ProjetoIntegradorI\\HackoonGameHub\\Repository\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/francisco/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/Exceptions.csproj": {
-              "projectPath": "/home/francisco/ProjetoIntegradorI/HackoonGameHub/Exceptions/Exceptions.csproj"
+            "C:\\Users\\Administrator\\Documents\\ProjetoIntegradorI\\HackoonGameHub\\Exceptions\\Exceptions.csproj": {
+              "projectPath": "C:\\Users\\Administrator\\Documents\\ProjetoIntegradorI\\HackoonGameHub\\Exceptions\\Exceptions.csproj"
             },
-            "/home/francisco/ProjetoIntegradorI/HackoonGameHub/Models/Models.csproj": {
-              "projectPath": "/home/francisco/ProjetoIntegradorI/HackoonGameHub/Models/Models.csproj"
+            "C:\\Users\\Administrator\\Documents\\ProjetoIntegradorI\\HackoonGameHub\\Models\\Models.csproj": {
+              "projectPath": "C:\\Users\\Administrator\\Documents\\ProjetoIntegradorI\\HackoonGameHub\\Models\\Models.csproj"
             }
           }
         }
@@ -260,7 +262,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.300"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net10.0": {
@@ -287,7 +289,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.300/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",
