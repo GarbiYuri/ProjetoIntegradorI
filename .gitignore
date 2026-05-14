@@ -9,9 +9,6 @@
 
 
 # Ignorar pastas de compilação do C# de forma recursiva
-bin/
-obj/
+/HackoonGameHub/*/bin/
+/HackoonGameHub/*/obj/
 
-#Não Ignorar os binarios do postgres
-!**/pgsql/bin/
-!**/pgsql/bin/**
