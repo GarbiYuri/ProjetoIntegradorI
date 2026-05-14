@@ -1,0 +1,14 @@
+2026-05-14 02:30:57.972 -03 [5264] LOG:  starting PostgreSQL 18.3 on x86_64-windows, compiled by msvc-19.44.35223, 64-bit
+2026-05-14 02:30:57.976 -03 [5264] LOG:  listening on IPv6 address "::1", port 5432
+2026-05-14 02:30:57.976 -03 [5264] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-05-14 02:30:58.029 -03 [8388] LOG:  database system was shut down at 2026-05-14 02:30:46 -03
+2026-05-14 02:30:58.038 -03 [5264] LOG:  database system is ready to accept connections
+2026-05-14 02:31:03.480 -03 [5264] LOG:  background worker "logical replication launcher" (PID 4464) was terminated by exception 0xC000013A
+2026-05-14 02:31:03.480 -03 [5264] HINT:  See C include file "ntstatus.h" for a description of the hexadecimal value.
+2026-05-14 02:31:03.480 -03 [5264] LOG:  terminating any other active server processes
+2026-05-14 02:31:03.483 -03 [5264] LOG:  received fast shutdown request
+^C2026-05-14 02:33:28.587 -03 [11580] LOG:  starting PostgreSQL 18.3 on x86_64-windows, compiled by msvc-19.44.35223, 64-bit
+2026-05-14 02:33:28.590 -03 [11580] LOG:  listening on IPv6 address "::1", port 5432
+2026-05-14 02:33:28.590 -03 [11580] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-05-14 02:33:28.645 -03 [8744] LOG:  database system was shut down at 2026-05-14 02:33:18 -03
+2026-05-14 02:33:28.653 -03 [11580] LOG:  database system is ready to accept connections
