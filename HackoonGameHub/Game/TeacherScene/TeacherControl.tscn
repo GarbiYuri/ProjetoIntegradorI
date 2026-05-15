@@ -1,0 +1,167 @@
+[gd_scene format=3 uid="uid://da5xa0ttx1tmf"]
+
+[ext_resource type="Script" uid="uid://bkj7r6ywk8bfw" path="res://TeacherControl.cs" id="1_bxgp0"]
+[ext_resource type="Script" uid="uid://c0ath4ay7p3pk" path="res://Scripts/BancoButton.cs" id="2_htlwq"]
+[ext_resource type="Texture2D" uid="uid://xccwqa2yj3o1" path="res://Assets/LoadingPacMan/1.png" id="3_i207t"]
+[ext_resource type="Texture2D" uid="uid://6ughrrgs6jnn" path="res://Assets/LoadingPacMan/2.png" id="4_enjfq"]
+[ext_resource type="Texture2D" uid="uid://c40lmboe716tj" path="res://Assets/LoadingPacMan/3.png" id="5_6ix8y"]
+[ext_resource type="Texture2D" uid="uid://ln316bqtjiae" path="res://Assets/LoadingPacMan/4.png" id="6_3jsqf"]
+[ext_resource type="Texture2D" uid="uid://dh52vg2p1n53s" path="res://Assets/LoadingPacMan/5.png" id="7_n622n"]
+[ext_resource type="Texture2D" uid="uid://cq2ppsxyfiibe" path="res://Assets/LoadingPacMan/6.png" id="8_s0i8h"]
+[ext_resource type="Texture2D" uid="uid://b4xt5c7fj4aql" path="res://Assets/LoadingPacMan/7.png" id="9_6gnwm"]
+[ext_resource type="Texture2D" uid="uid://b40nsaysq3pj7" path="res://Assets/LoadingPacMan/8.png" id="10_urepq"]
+[ext_resource type="Texture2D" uid="uid://lwhxjm83rtq2" path="res://Assets/LoadingPacMan/9.png" id="11_n1732"]
+[ext_resource type="Texture2D" uid="uid://c1i60hnhssy5i" path="res://Assets/LoadingPacMan/10.png" id="12_t445s"]
+[ext_resource type="Texture2D" uid="uid://nt07ondb375q" path="res://Assets/LoadingPacMan/11.png" id="13_o27ck"]
+[ext_resource type="Texture2D" uid="uid://b63up8ryxbl17" path="res://Assets/LoadingPacMan/12.png" id="14_6jubt"]
+[ext_resource type="Texture2D" uid="uid://bwuhq53cvpr0s" path="res://Assets/LoadingPacMan/13.png" id="15_6nwal"]
+[ext_resource type="Texture2D" uid="uid://b5sgoeeha6nuk" path="res://Assets/LoadingPacMan/14.png" id="16_m2c8s"]
+[ext_resource type="Texture2D" uid="uid://cu0k5gp0sab16" path="res://Assets/LoadingPacMan/15.png" id="17_fm422"]
+[ext_resource type="Texture2D" uid="uid://dmjs2uj88inud" path="res://Assets/LoadingPacMan/16.png" id="18_ln5vp"]
+[ext_resource type="Texture2D" uid="uid://bc7unh8078iwp" path="res://Assets/LoadingPacMan/17.png" id="19_fldrh"]
+[ext_resource type="Texture2D" uid="uid://btn85pcswal1r" path="res://Assets/LoadingPacMan/18.png" id="20_n5uk2"]
+[ext_resource type="Texture2D" uid="uid://bajlpb14ki3iw" path="res://Assets/LoadingPacMan/19.png" id="21_loio3"]
+[ext_resource type="Texture2D" uid="uid://6l88rcppvxhr" path="res://Assets/LoadingPacMan/20.png" id="22_4x8ne"]
+[ext_resource type="Texture2D" uid="uid://bfx0jb8anvyeo" path="res://Assets/LoadingPacMan/21.png" id="23_ls03f"]
+[ext_resource type="Texture2D" uid="uid://7o0wh1vgncab" path="res://Assets/LoadingPacMan/22.png" id="24_6g1p5"]
+[ext_resource type="Texture2D" uid="uid://dwvw1pbqo0s37" path="res://Assets/LoadingPacMan/23.png" id="25_t8wfs"]
+[ext_resource type="Texture2D" uid="uid://bedp8teul3xv3" path="res://Assets/LoadingPacMan/24.png" id="26_hvtuy"]
+[ext_resource type="Texture2D" uid="uid://d0vmfcr1egvhj" path="res://Assets/LoadingPacMan/25.png" id="27_xn0gm"]
+[ext_resource type="Texture2D" uid="uid://ck4a7lafrdgw4" path="res://Assets/LoadingPacMan/26.png" id="28_0s8v3"]
+[ext_resource type="Texture2D" uid="uid://cyirq327hi7g3" path="res://Assets/LoadingPacMan/27.png" id="29_iynvw"]
+[ext_resource type="Texture2D" uid="uid://bq6465i56xeg8" path="res://Assets/LoadingPacMan/28.png" id="30_rt4ot"]
+[ext_resource type="Texture2D" uid="uid://brdgk7typdgww" path="res://Assets/LoadingPacMan/29.png" id="31_xs3ui"]
+[ext_resource type="Texture2D" uid="uid://bf5k0cputo66i" path="res://Assets/LoadingPacMan/30.png" id="32_mriwe"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wfcky"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 0.13,
+"texture": ExtResource("3_i207t")
+}, {
+"duration": 0.13,
+"texture": ExtResource("4_enjfq")
+}, {
+"duration": 0.13,
+"texture": ExtResource("5_6ix8y")
+}, {
+"duration": 0.13,
+"texture": ExtResource("6_3jsqf")
+}, {
+"duration": 0.13,
+"texture": ExtResource("7_n622n")
+}, {
+"duration": 0.13,
+"texture": ExtResource("8_s0i8h")
+}, {
+"duration": 0.13,
+"texture": ExtResource("9_6gnwm")
+}, {
+"duration": 0.13,
+"texture": ExtResource("10_urepq")
+}, {
+"duration": 0.13,
+"texture": ExtResource("11_n1732")
+}, {
+"duration": 0.13,
+"texture": ExtResource("12_t445s")
+}, {
+"duration": 0.13,
+"texture": ExtResource("13_o27ck")
+}, {
+"duration": 0.13,
+"texture": ExtResource("14_6jubt")
+}, {
+"duration": 0.13,
+"texture": ExtResource("15_6nwal")
+}, {
+"duration": 0.13,
+"texture": ExtResource("16_m2c8s")
+}, {
+"duration": 0.13,
+"texture": ExtResource("17_fm422")
+}, {
+"duration": 0.13,
+"texture": ExtResource("18_ln5vp")
+}, {
+"duration": 0.13,
+"texture": ExtResource("19_fldrh")
+}, {
+"duration": 0.13,
+"texture": ExtResource("20_n5uk2")
+}, {
+"duration": 0.13,
+"texture": ExtResource("21_loio3")
+}, {
+"duration": 0.13,
+"texture": ExtResource("22_4x8ne")
+}, {
+"duration": 0.13,
+"texture": ExtResource("23_ls03f")
+}, {
+"duration": 0.13,
+"texture": ExtResource("24_6g1p5")
+}, {
+"duration": 0.13,
+"texture": ExtResource("25_t8wfs")
+}, {
+"duration": 0.13,
+"texture": ExtResource("26_hvtuy")
+}, {
+"duration": 0.13,
+"texture": ExtResource("27_xn0gm")
+}, {
+"duration": 0.13,
+"texture": ExtResource("28_0s8v3")
+}, {
+"duration": 0.13,
+"texture": ExtResource("29_iynvw")
+}, {
+"duration": 0.13,
+"texture": ExtResource("30_rt4ot")
+}, {
+"duration": 0.13,
+"texture": ExtResource("31_xs3ui")
+}, {
+"duration": 0.13,
+"texture": ExtResource("32_mriwe")
+}],
+"loop": true,
+"name": &"loading",
+"speed": 5.0
+}]
+
+[node name="Control" type="Control" unique_id=1279200488]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -3.0
+offset_right = 4.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bxgp0")
+
+[node name="BancoButton" type="Button" parent="." unique_id=2095187646]
+layout_mode = 0
+offset_left = 417.0
+offset_top = 268.0
+offset_right = 733.0
+offset_bottom = 358.0
+text = "Conectar Ao Banco"
+icon_alignment = 1
+script = ExtResource("2_htlwq")
+
+[node name="loadingIcon" type="AnimatedSprite2D" parent="BancoButton" unique_id=1377443027]
+visible = false
+position = Vector2(162.00002, 190)
+sprite_frames = SubResource("SpriteFrames_wfcky")
+animation = &"loading"

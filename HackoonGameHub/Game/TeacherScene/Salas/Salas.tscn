@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://bd15bfekhsxu5"]
+
+[ext_resource type="Script" uid="uid://b2il7p1105wwg" path="res://Scripts/TeacherControl/Sala/Salas.cs" id="1_s1nsy"]
+[ext_resource type="Script" uid="uid://cy2asxd2vpwyo" path="res://Scripts/TeacherControl/Sala/CriarSala.cs" id="2_cle7b"]
+
+[node name="Control" type="Control" unique_id=1181948474]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_s1nsy")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1950380448]
+layout_mode = 0
+offset_left = 340.0
+offset_top = 99.0
+offset_right = 699.0
+offset_bottom = 408.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer" unique_id=258252864]
+layout_mode = 2
+
+[node name="criar_sala" type="Button" parent="." unique_id=444933724]
+layout_mode = 0
+offset_left = 434.0
+offset_top = 448.0
+offset_right = 677.0
+offset_bottom = 526.0
+text = "Salvar Sala"
+script = ExtResource("2_cle7b")
+
+[node name="Window" type="Window" parent="." unique_id=582014528]
+oversampling_override = 1.0
+position = Vector2i(330, 189)
+size = Vector2i(465, 417)
+visible = false
