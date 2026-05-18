@@ -1,7 +1,10 @@
 using System.Diagnostics;
 using Npgsql;
 using Repository.Exceptions;
-
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 namespace Repository.Postgress;
 
 public class DB
