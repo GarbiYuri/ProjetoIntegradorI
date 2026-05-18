@@ -12,11 +12,16 @@ public class ProfessorDB
     {
         DB.testConnection();
 
-        if (professor.name == null || professor.email == null)
+        if (professor.name == null || professor.email == null || !professor.email.Contains("@"))
         {
             throw new InvalidParameterException("Faltam Parametros Obrigatórios para Professor");
         }
 
+        if (await ProfessorExists(professor.email))
+        {
+            throw new ResourceAlreadyExistsException("Professor Já Cadastrado com este email");
+        }
+        
         await using var cmd = DB.dataSource.CreateCommand(
             @"INSERT INTO professores (name, email, password, created_at) values ($1, $2, $3, $4) returning id;");
         cmd.Parameters.AddWithValue(professor.name);

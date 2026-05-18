@@ -17,6 +17,11 @@ public class AlunoDB
             throw new InvalidParameterException("Faltam Parametros Obrigatórios para Aluno");
         }
 
+        if (await AlunoExists(aluno.username))
+        {
+            throw new ResourceAlreadyExistsException("O ALuno com Nick: " + aluno.username + " Já existe");
+        }
+        
         await using var cmd = DB.dataSource.CreateCommand(
             @"INSERT INTO alunos (username, name, turma, points, level, xp, stars, id_sala, password, created_at) 
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;");
@@ -32,11 +37,14 @@ public class AlunoDB
         cmd.Parameters.AddWithValue(aluno.password ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue(aluno.createdAt);
 
-        var res = await cmd.ExecuteScalarAsync();
-        if (res != null)
-        {
-            aluno.id = Convert.ToInt32(res);
-        }
+        
+        
+            var res = await cmd.ExecuteScalarAsync();
+            if (res != null)
+            {
+                aluno.id = Convert.ToInt32(res);
+            }
+        
     }
 
     public static async Task<List<Aluno>> Listar()
