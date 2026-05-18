@@ -60,7 +60,7 @@ public class SalaDB
   
             DB.testConnection();
             
-            await using var cmd = DB.dataSource.CreateCommand("Select id, name, descricao from salas where id = $1");
+            await using var cmd = DB.dataSource.CreateCommand("Select id, name, descricao, created_at from salas where id = $1");
             cmd.Parameters.AddWithValue(id_sala);
 
             await using var reader = await cmd.ExecuteReaderAsync();
