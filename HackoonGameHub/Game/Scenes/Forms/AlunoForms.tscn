@@ -42,26 +42,38 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_m3vxr")
 
-[node name="alunosHBoxContainer" type="HBoxContainer" parent="PanelContainer" unique_id=133637744]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=1445286227]
 layout_mode = 2
 
-[node name="nomeVBoxContainer" type="VBoxContainer" parent="PanelContainer/alunosHBoxContainer" unique_id=1510519472]
+[node name="alunosHBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=133637744]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="PanelContainer/alunosHBoxContainer/nomeVBoxContainer" unique_id=655965120]
+[node name="nomeVBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/alunosHBoxContainer" unique_id=1510519472]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/alunosHBoxContainer/nomeVBoxContainer" unique_id=655965120]
 layout_mode = 2
 text = "NOME"
 
-[node name="sobrenomeVBoxContainer" type="VBoxContainer" parent="PanelContainer/alunosHBoxContainer" unique_id=716741632]
+[node name="sobrenomeVBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/alunosHBoxContainer" unique_id=716741632]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="PanelContainer/alunosHBoxContainer/sobrenomeVBoxContainer" unique_id=578534486]
+[node name="Label3" type="Label" parent="PanelContainer/VBoxContainer/alunosHBoxContainer/sobrenomeVBoxContainer" unique_id=578534486]
 layout_mode = 2
 text = "| SOBRENOME"
 
-[node name="buttonContainer" type="VBoxContainer" parent="PanelContainer/alunosHBoxContainer" unique_id=339833968]
+[node name="buttonContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/alunosHBoxContainer" unique_id=339833968]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="PanelContainer/alunosHBoxContainer/buttonContainer" unique_id=232825577]
+[node name="Label3" type="Label" parent="PanelContainer/VBoxContainer/alunosHBoxContainer/buttonContainer" unique_id=232825577]
 layout_mode = 2
 text = "| BUTTON"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=655318066]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1079177408]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "CRIAR PERSONAGEM"

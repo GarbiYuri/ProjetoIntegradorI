@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bx8gwhwrx25mg"]
+
+[ext_resource type="PackedScene" uid="uid://p4vbm24vx8pn" path="res://Scenes/Backgrounds/backgroundNode.tscn" id="1_sq1wc"]
+
+[node name="CreateAluno" type="Control" unique_id=1850183539]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="InicialBackground" parent="." unique_id=1272133862 instance=ExtResource("1_sq1wc")]
+layout_mode = 1
