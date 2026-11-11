@@ -17,8 +17,20 @@
       <ProjectReference Include="..\Models\Models.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Include="..\pgsql\**\*">
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+        <None Include="..\pgsql\pgsql\**\*" Link="pgsql\windows\%(RecursiveDir)%(Filename)%(Extension)">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+        <None Include="..\pgsql\linux\**\*" Link="pgsql\linux\%(RecursiveDir)%(Filename)%(Extension)">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <None Include="..\pgsql\macos\**\*" Link="pgsql\macos\%(RecursiveDir)%(Filename)%(Extension)">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>

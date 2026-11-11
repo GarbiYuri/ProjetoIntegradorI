@@ -8,10 +8,12 @@ namespace Service;
 
 public static class ProfessorService
 {
-    public static async void RegisterProfessor(Professor professor)
+    private static bool _broadcastando = false;
+
+    public static async Task RegisterProfessor(Professor professor)
     {
-             professor.password = BCrypt.Net.BCrypt.HashPassword(professor.password);
-            await ProfessorDB.Create(professor);
+        professor.password = BCrypt.Net.BCrypt.HashPassword(professor.password);
+        await ProfessorDB.Create(professor);
     }
 
     public static async Task<Professor?> LoginProfessor(string email, string password)
@@ -29,24 +31,44 @@ public static class ProfessorService
             return professor;
     }
 
-    public static async Task SendMessage(string message)
+    public static void SendMessage(string message, string roomName = "Sala")
     {
+        if (_broadcastando) return;
+        _broadcastando = true;
+
         var pacoteServidor = new NetworkPacket{
             Tipo = "DESCOBERTA_SERVIDOR",
             DadosJson = JsonSerializer.Serialize(new {
                 Status = "LOBBY_ABERTO",
-                Message = message
+                Message = message,
+                Room = roomName,
+                Port = DB.Porta
             })
         };
+
         _ = Task.Run(async () =>
         {
-            while (true)
+            while (_broadcastando)
             {
-                BroadcastUDP.SendBroadcast(pacoteServidor);
+                try
+                {
+                    // Anúncio vai para a porta do ALUNO (11001), que é onde
+                    // ele escuta as sessões abertas.
+                    BroadcastUDP.SendBroadcast(pacoteServidor, BroadcastUDP.PortaAluno);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("[UDP] Falha ao anunciar o professor: " + e.Message);
+                }
+
                 await Task.Delay(1000);
             }
         });
+    }
 
+    public static void StopMessage()
+    {
+        _broadcastando = false;
     }
     public static async Task<string> StartGameAsync()
     {
@@ -93,11 +115,11 @@ public static class ProfessorService
         return professor;
 
     }
-    public static async Task<NetworkPacket> carregarAlunos()
+    public static async Task<NetworkPacket?> carregarAlunos()
     {
         var tcs = new TaskCompletionSource<NetworkPacket>();
   
-        Action<string, string> tratarMensagemUDP = null;
+        Action<string, string>? tratarMensagemUDP = null;
         tratarMensagemUDP = (senderIP, jsonRecebido) =>
         {
             try
@@ -112,26 +134,32 @@ public static class ProfessorService
                         DadosJson = jsonRecebido
                     };
                     BroadcastUDP.OnMessageReceived -= tratarMensagemUDP;
-                    
+                    BroadcastUDP.StopListening();
                     tcs.TrySetResult(networkPacketResult);
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
             }
             
         };
         BroadcastUDP.OnMessageReceived += tratarMensagemUDP;
         
-        _ = Task.Run(() => BroadcastUDP.StartListeningAsync());
-        
-        NetworkPacket networkPacketFinal = await tcs.Task;
-        
-        BroadcastUDP.StopListening();
-        
-        return networkPacketFinal;
+        _ = Task.Run(() => BroadcastUDP.StartListeningProfessor());
+
+        // Espera no máximo 20 segundos por um aluno; se ninguém entrar,
+        // libera a tela para o professor abrir o lobby mesmo assim.
+        Task concluida = await Task.WhenAny(tcs.Task, Task.Delay(20000));
+
+        if (concluida != tcs.Task)
+        {
+            BroadcastUDP.OnMessageReceived -= tratarMensagemUDP;
+            BroadcastUDP.StopListening();
+            return null;
+        }
+
+        return await tcs.Task;
     }
     
 }

@@ -5,9 +5,9 @@ namespace Models;
 
 public class Aluno : Usuario
 {
-    public string username { get; set; }
+    public string? username { get; set; }
     public int? id_sala { get; set; }
-    public string turma { get; set; }
+    public string? turma { get; set; }
     public int points { get; set; } = 0;
     public int level { get; set; } = 1;
     public int xp { get; set; } = 0;

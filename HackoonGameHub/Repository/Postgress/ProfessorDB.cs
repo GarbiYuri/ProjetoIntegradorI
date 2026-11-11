@@ -55,7 +55,7 @@ public class ProfessorDB
                 reader.GetInt32(0),
                 reader.GetString(1),
                 reader.GetString(2),
-                reader.GetDateTime(4)
+                reader.GetDateTime(3)
             );
             lista.Add(p);
         }

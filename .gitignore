@@ -16,4 +16,8 @@
 /HackoonGameHub/Game/.godot/
 /HackoonGameHub/Game/android/
 
+# PostgreSQL embutido: cluster de dados e log gerados em tempo de execução
+/HackoonGameHub/pgsql/*/data/
+/HackoonGameHub/pgsql/*/postgres.log
+
 

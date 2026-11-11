@@ -1,20 +1,9 @@
-[gd_scene format=3 uid="uid://btayuus5pejfp"]
+[gd_scene load_steps=6 format=3 uid="uid://btayuus5pejfp"]
 
 [ext_resource type="Script" uid="uid://7g1sfguhpgvk" path="res://Scripts/SceneControlls/AlunoEntrar.cs" id="1_5pdgj"]
 [ext_resource type="PackedScene" uid="uid://p4vbm24vx8pn" path="res://Scenes/Backgrounds/backgroundNode.tscn" id="1_tq0ls"]
 [ext_resource type="PackedScene" uid="uid://ietdf4bl0i6f" path="res://Scenes/Music/music_controll.tscn" id="2_im3t2"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_im3t2"]
-bg_color = Color(0.5921569, 0.6039216, 0.58431375, 1)
-border_width_left = 10
-border_width_top = 10
-border_width_right = 10
-border_width_bottom = 10
-border_color = Color(0.5921569, 0.6039216, 0.58431375, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[ext_resource type="Theme" path="res://Assets/Theme/HackoonTheme.tres" id="3_theme"]
 
 [node name="Control" type="Control" unique_id=2007611136]
 layout_mode = 3
@@ -23,63 +12,91 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("3_theme")
 script = ExtResource("1_5pdgj")
 
 [node name="InicialBackground" parent="." unique_id=1272133862 instance=ExtResource("1_tq0ls")]
 layout_mode = 1
 
-[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1517817292]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_im3t2")
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 32
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=2127978702]
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer"]
 layout_mode = 2
 
-[node name="nomeSalaLabel" type="Label" parent="PanelContainer/VBoxContainer" unique_id=1680473926]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/CenterContainer"]
+custom_minimum_size = Vector2(780, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "Professor"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 34
+text = "Entrar em uma sessão"
 horizontal_alignment = 1
 
-[node name="professorHBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=1652809424]
+[node name="SubtitleLabel" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.70980394, 0.7607843, 0.8666667, 1)
+theme_override_font_sizes/font_size = 16
+text = "Sessões abertas pelos professores na rede local"
+horizontal_alignment = 1
 
-[node name="ipVBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/professorHBoxContainer" unique_id=1517241720]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/professorHBoxContainer/ipVBoxContainer" unique_id=996826466]
-layout_mode = 2
-text = "ENDEREÇO IP"
-
-[node name="middleVBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/professorHBoxContainer" unique_id=1259196326]
+[node name="Separator" type="HSeparator" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/professorHBoxContainer/middleVBoxContainer" unique_id=1767040718]
+[node name="Sessoes" type="VBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "|"
+theme_override_constants/separation = 10
 
-[node name="buttonVBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/professorHBoxContainer" unique_id=1529865291]
+[node name="StatusLabel" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.7411765, 0.7882353, 0.8862745, 1)
+theme_override_font_sizes/font_size = 16
+text = "Procurando sessões na rede..."
+horizontal_alignment = 1
+autowrap_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/professorHBoxContainer/buttonVBoxContainer" unique_id=668181]
+[node name="Buttons" type="HBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-text = "BOTÃO"
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="RetryButton" type="Button" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+text = "PROCURAR NOVAMENTE"
+
+[node name="BackButton" type="Button" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+text = "VOLTAR AO MENU"
 
 [node name="MusicControll" parent="." unique_id=665168816 instance=ExtResource("2_im3t2")]
 layout_mode = 1
-offset_top = -86.875
-offset_bottom = -86.875
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -110.0
+offset_top = 20.0
+offset_right = -30.0
+offset_bottom = 100.0
+grow_horizontal = 0
 scale = Vector2(0.18, 0.18)

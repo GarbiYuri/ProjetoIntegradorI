@@ -4,7 +4,7 @@ public class Sala
 {
     public int id { get; set; }
     public string name { get; set; }
-    public string descricao { get; set; }
+    public string? descricao { get; set; }
     
     public DateTime createdAt { get; set; }
 
