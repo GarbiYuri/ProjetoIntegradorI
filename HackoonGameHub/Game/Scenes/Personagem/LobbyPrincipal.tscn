@@ -355,6 +355,68 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "SAIR DO LOBBY"
 
+[node name="JogosPanel" type="PanelContainer" parent="CanvasLayer/Hud"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+offset_left = 20.0
+offset_top = 140.0
+offset_right = 400.0
+offset_bottom = 430.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Titulo" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 18
+text = "JOGOS ONLINE"
+
+[node name="CriarRow" type="HBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="JogoNomeEdit" type="LineEdit" parent="CanvasLayer/Hud/JogosPanel/VBox/CriarRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Nome do seu jogo"
+
+[node name="CriarJogoButton" type="Button" parent="CanvasLayer/Hud/JogosPanel/VBox/CriarRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_iniciar")
+theme_override_styles/hover = SubResource("StyleBoxFlat_iniciar_hover")
+text = "CRIAR"
+
+[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="JogosList" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="JogoStatus" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
+theme_override_font_sizes/font_size = 14
+text = "Nenhum jogo criado ainda."
+autowrap_mode = 2
+
+[node name="SairJogoButton" type="Button" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "SAIR DO JOGO"
+
 [node name="HintLabel" type="Label" parent="CanvasLayer/Hud"]
 unique_name_in_owner = true
 layout_mode = 1
@@ -462,6 +524,25 @@ autowrap_mode = 2
 
 [node name="Separator2" type="HSeparator" parent="CanvasLayer/Dashboard/Panel/VBox"]
 layout_mode = 2
+
+[node name="JogosTitle" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.70980394, 0.7607843, 0.8666667, 1)
+theme_override_font_sizes/font_size = 14
+text = "JOGOS CRIADOS PELOS ALUNOS"
+
+[node name="DashboardJogos" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DashboardJogosEmpty" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 15
+text = "Nenhum jogo aberto pelos alunos."
+autowrap_mode = 2
 
 [node name="Buttons" type="HBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
 layout_mode = 2

@@ -140,7 +140,45 @@ Personagem (Node2D)
   (HUD/dashboard/overlay). Textos “placeholder” na tela (USERNAME, NAME, BOTÃO
   etc.) foram removidos.
 
-### 2.5.1 Lobby sempre aberto + botão INICIAR JOGO
+### 2.5.2 Aluno não cria lobby: só conexão interna para o jogo
+
+Regra do projeto: **quem cria sala (lobby) é o professor**. O aluno entra na
+sala que o professor abriu e, dentro do lobby, pode criar o **jogo online** —
+que é uma **conexão interna**, não uma sala nova.
+
+**Lista de alunos da sala (visível para os alunos):**
+
+- O anúncio UDP do professor (`ProfessorService.SendMessage`) é remontado a
+  cada segundo e agora carrega a **lista de alunos conectados** (`Alunos`),
+  o **id da sala** (`SalaId`) e o **IP do professor** (`HostIp`, para o aluno
+  sempre conectar no endereço certo).
+- A lista é montada na thread principal (`AtualizarAlunosConectados`) e só
+  *trocada* — o anúncio roda em thread de rede e não pode tocar na árvore de
+  cenas.
+- `AlunoService.OuvirAnuncios` deixa o aluno **ouvindo continuamente**: a
+  tela `AlunoEntrar` mostra o cartão da sessão e a lista **ALUNOS NESTA
+  SALA** se atualizando sozinha (a interface é montada no `_Process`, na
+  thread principal).
+- Ao entrar, a conta do aluno é **vinculada à sala** (`alunos.id_sala`,
+  `AlunoDB.VincularSala`), então a sala também guarda quem está vinculado a
+  ela.
+
+**Conexão interna (jogo online do aluno):**
+
+- Botão **CRIAR** no painel **JOGOS ONLINE** (visível só para os alunos):
+  o aluno sobe um **segundo servidor ENet** (porta `7778`+) numa **API de
+  multiplayer separada**, aplicada apenas ao nó `World/Jogos` — a conexão do
+  lobby continua intacta.
+- O servidor do lobby recebe o pedido por RPC (`RequisitarJogo`), registra o
+  jogo (tabela `jogos`, criada automaticamente) e **divulga a lista** para
+  todos; quem entra depois recebe a lista ao se conectar.
+- Os colegas veem o jogo e entram com **ENTRAR** (conexão separada, sem
+  sair do lobby). O dono pode **FECHAR**; o professor pode **ENCERRAR** pelo
+  painel dele.
+- Atalhos de desenvolvimento: `--lobby-criar-jogo[=SEGUNDOS]` e
+  `--lobby-entrar-jogo[=SEGUNDOS]`.
+
+### 2.5.3 Lobby sempre aberto + botão INICIAR JOGO
 
 **Problema:** o lobby (ENet) só abria quando o professor apertava **ABRIR
 LOBBY** na tela de espera. Com o professor parado no painel, os alunos ficavam
@@ -358,11 +396,15 @@ Correções encontradas durante essa validação:
 | `Game/Scripts/Personagem/Personagem.cs` | Movimento WASD/setas, animação, câmera e nome |
 | `Game/Scenes/LobbyPanel.tscn` | Tela de espera redesign (tema, lista de alunos, ABRIR LOBBY) — **fora do fluxo** (o painel dentro do lobby faz esse papel) |
 | `Game/Scripts/SceneControlls/LobbyPanel.cs` | Broadcast com nome da sala, escuta contínua de alunos e abertura do lobby |
-| `Game/Scenes/AlunoEntrar.tscn` | Tela de sessões redesign (mostra sala/professor/IP) |
-| `Game/Scripts/SceneControlls/AlunoEntrar.cs` | Leitura da sessão (incl. `Room`), cartão da sessão e retry |
+| `Game/Scenes/AlunoEntrar.tscn` | Tela de sessões redesign (mostra sala/professor/IP) **+ lista ALUNOS NESTA SALA ao vivo** |
+| `Game/Scripts/SceneControlls/AlunoEntrar.cs` | Escuta contínua do anúncio, cartão da sessão, lista de alunos da sala e vínculo da conta à sala |
+| `Models/AlunoOnline.cs` | Aluno conectado (nome + nick) que vai no anúncio |
+| `Models/Jogo.cs` | Jogo interno (conexão criada pelo aluno dentro do lobby) |
+| `Repository/Postgress/JogoDB.cs` | Acesso à tabela `jogos` (criada automaticamente) |
+| `Service/Usuario/JogoService.cs` | Criar/listar/encerrar os jogos internos |
 | `Game/Scenes/Forms/AlunoForms.tscn` | Escolha de personagem redesign |
 | `Game/Scripts/SceneControlls/FormsAlunos.cs` | Aluno entra no lobby após escolher persona |
-| `Game/Scenes/InitialScene.tscn` | Menu inicial redesign (tema compartilhado) |
+| `Game/Scenes/InitialScene.tscn` | Menu inicial redesign (tema compartilhado) com os papéis explícitos: **SALA DO PROFESSOR** / **ENTRAR COMO ALUNO** |
 | `Game/Scenes/Forms/FormsProfessor.tscn` | Login do professor redesign, senha oculta |
 | `Game/Scenes/Forms/FormsSalas.tscn` | Gerenciamento de salas redesign |
 | `Game/Scenes/Forms/AlunoConta.tscn` | **Nova** tela de conta da criança (criar/acessar + cor + preview + JOGAR) |
@@ -372,13 +414,13 @@ Correções encontradas durante essa validação:
 | `Game/Scenes/Dev/ScreenshotRunner.tscn` + `Game/Scripts/Dev/ScreenshotRunner.cs` | Ferramenta de screenshots para conferir o visual das telas |
 | `Game/Assets/Theme/HackoonTheme.tres` | Tema compartilhado (escuro + amarelo Hackoon) |
 | `Game/Scripts/SessionManager.cs` | Dados de sessão do lobby e parada do banco ao sair |
-| `Repository/Postgress/DB.cs` | PostgreSQL embutido multiplataforma (initdb/pg_ctl, porta e stop) |
+| `Repository/Postgress/DB.cs` | PostgreSQL embutido multiplataforma (initdb/pg_ctl, porta e stop) + tabela `jogos` |
+| `Repository/Postgress/AlunoDB.cs` | Correção da consulta `GetAlunoById` + vínculo do aluno à sala (`VincularSala`) |
 | `Repository/Repository.csproj` | Cópia da pasta `pgsql` do SO atual para a saída do build |
 | `Repository/Network/BroadcastUDP.cs` | Portas divididas (`11000` professor / `11001` aluno), broadcast multi-destino (loopback + 255.255.255.255 + sub-rede) e encerramento correto do socket |
-| `Repository/Postgress/AlunoDB.cs` | Correção da consulta `GetAlunoById` |
 | `Repository/Postgress/ProfessorDB.cs` | Correção do índice de `created_at` em `Listar` |
-| `Service/Usuario/AlunoService.cs` | Correção do pacote de persona e guarda de envio; `RegisterAluno` async sem engolir erro; novo `Existe` |
-| `Service/Usuario/ProfessorService.cs` | Broadcast único (agora com o nome da sala e a porta do banco), timeout e cadastro aguardado |
+| `Service/Usuario/AlunoService.cs` | Correção do pacote de persona e guarda de envio; `RegisterAluno` async sem engolir erro; novo `Existe`; **`OuvirAnuncios`** (escuta contínua) e `VincularAoLobby` |
+| `Service/Usuario/ProfessorService.cs` | Broadcast único (com nome da sala, porta do banco, **lista de alunos**, id da sala e IP do professor), timeout e cadastro aguardado |
 
 ## 6. Como estilizar o personagem depois
 

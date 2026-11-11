@@ -63,6 +63,34 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 10
 
+[node name="AlunosTitle" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 18
+text = "ALUNOS NESTA SALA"
+
+[node name="AlunosPanel" type="PanelContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AlunosBox" type="VBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/AlunosPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="AlunosList" type="VBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/AlunosPanel/AlunosBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="AlunosVazio" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/AlunosPanel/AlunosBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 15
+text = "Nenhum aluno conectado ainda."
+horizontal_alignment = 1
+
 [node name="StatusLabel" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2

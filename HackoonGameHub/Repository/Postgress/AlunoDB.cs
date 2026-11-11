@@ -186,4 +186,20 @@ public class AlunoDB
         await using var reader = await cmd.ExecuteReaderAsync();
         return reader.HasRows;
     }
+
+    /// <summary>
+    /// Liga o aluno à sala em que ele entrou (para a lista de alunos da sala).
+    /// </summary>
+    public static async Task VincularSala(int alunoId, int salaId)
+    {
+        DB.testConnection();
+
+        await using var cmd = DB.dataSource.CreateCommand(
+            "UPDATE alunos SET id_sala = $1 WHERE id = $2");
+
+        cmd.Parameters.AddWithValue(salaId);
+        cmd.Parameters.AddWithValue(alunoId);
+
+        await cmd.ExecuteNonQueryAsync();
+    }
 }

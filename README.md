@@ -17,23 +17,33 @@ O projeto é dividido em:
 
 ## Fluxo atual
 
-1. **Professor**: menu inicial → login/cadastro → lista de salas → escolhe uma
-   sala → **entra direto no lobby**, com o **painel do professor** (dashboard)
-   aberto. A sessão já fica **anunciada na rede** nesse momento, então os
-   alunos podem entrar a qualquer momento — não existe mais uma tela de
-   espera que precise ser aberta para o lobby aparecer.
-2. **Aluno**: menu inicial → vê a sessão aberta pelo professor (nome da sala,
-   professor e IP vindos do broadcast UDP) → **tela de conta** (cria a conta
-   ou acessa, escolhe a cor do personagem) → **JOGAR** entra direto no lobby
-   como cliente (o lobby já está aberto, então entra na hora).
+1. **Professor**: menu inicial → **SALA DO PROFESSOR** → login/cadastro →
+   lista de salas → escolhe uma sala → **entra direto no lobby**, com o
+   **painel do professor** (dashboard) aberto. A sessão já fica **anunciada na
+   rede** nesse momento, então os alunos podem entrar a qualquer momento —
+   não existe mais uma tela de espera que precise ser aberta para o lobby
+   aparecer.
+2. **Aluno**: menu inicial → **ENTRAR COMO ALUNO** → vê a sessão aberta pelo
+   professor (nome da sala, professor e IP vindos do broadcast UDP) e a
+   **lista de alunos que já estão na sala** (atualizada ao vivo) → **tela de
+   conta** (cria a conta ou acessa, escolhe a cor do personagem) → **JOGAR**
+   entra direto no lobby como cliente (o lobby já está aberto, então entra na
+   hora).
 3. **Lobby**: cena top-down com os personagens dos alunos sincronizados via
    ENet (porta `7777`), cada um com a cor escolhida na tela de conta. O
    professor **não aparece como personagem**: ele fica com o **painel de
-   gerenciamento**, que lista os alunos conectados, permite **INICIAR JOGO**
-   e **ENCERRAR CONEXÃO** (fecha a sessão para todos).
+   gerenciamento**, que lista os alunos conectados, os jogos criados pelos
+   alunos, e permite **INICIAR JOGO** e **ENCERRAR CONEXÃO** (fecha a sessão
+   para todos).
 4. **INICIAR JOGO**: fecha o painel e todos (professor e alunos) ficam no
    lobby — que é onde os minigames vão entrar (nó `World/Jogos`). O professor
    pode voltar ao painel a qualquer momento pelo botão **PAINEL** do HUD.
+5. **Jogo online (conexão interna)**: **só o aluno cria jogo** — ele não cria
+   sala (lobby), isso é do professor. Dentro do lobby, o aluno abre uma
+   **conexão interna** (outro servidor ENet, porta `7778`+) com o botão
+   **CRIAR** do painel **JOGOS ONLINE**; os colegas da sala veem o jogo na
+   lista e entram com **ENTRAR**. O professor acompanha e pode **ENCERRAR**
+   esses jogos pelo painel dele.
 
 ## Como executar
 
@@ -86,6 +96,25 @@ para esperar 3 segundos antes de disparar:
 ```bash
 godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-host --lobby-iniciar=3
+```
+
+### Testar o jogo online criado pelo aluno (conexão interna)
+
+Em dois terminais:
+
+```bash
+# Terminal 1 (host) — e um cliente que cria o jogo
+godot --path HackoonGameHub/Game \
+  res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-host
+
+godot --path HackoonGameHub/Game \
+  res://Scenes/Personagem/LobbyPrincipal.tscn -- \
+  --lobby-join=127.0.0.1 --lobby-criar-jogo=3
+
+# Terminal 3 (outro aluno) — entra no jogo criado
+godot --path HackoonGameHub/Game \
+  res://Scenes/Personagem/LobbyPrincipal.tscn -- \
+  --lobby-join=127.0.0.1 --lobby-entrar-jogo=8
 ```
 
 ## Personagem padrão (placeholder)

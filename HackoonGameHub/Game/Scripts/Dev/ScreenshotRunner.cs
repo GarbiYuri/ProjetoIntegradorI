@@ -30,7 +30,20 @@ public partial class CaptureNode : Node
 		GetTree().ChangeSceneToFile(cena);
 
 		// Espera alguns frames para o layout e o background assentarem.
-		for (int i = 0; i < 50; i++)
+		int frames = 50;
+
+		// "--espera=60" espera mais frames (útil para capturar telas que
+		// dependem de outro processo, como o painel com a lista de jogos).
+		foreach (string argumento in OS.GetCmdlineUserArgs())
+		{
+			if (argumento.StartsWith("--espera=") &&
+				int.TryParse(argumento.Substring("--espera=".Length), out int extra))
+			{
+				frames += extra;
+			}
+		}
+
+		for (int i = 0; i < frames; i++)
 		{
 			await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 		}

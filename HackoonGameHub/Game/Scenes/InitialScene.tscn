@@ -80,14 +80,16 @@ alignment = 1
 [node name="StartButton" type="Button" parent="PanelContainer/VBoxContainer" unique_id=1337129972]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
+tooltip_text = "Só o professor cria a sala (lobby) e abre o jogo para a turma."
 theme_override_font_sizes/font_size = 26
-text = "INICIAR JOGO"
+text = "SALA DO PROFESSOR"
 
 [node name="EnterButton" type="Button" parent="PanelContainer/VBoxContainer" unique_id=1625983789]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
+tooltip_text = "O aluno entra na sala que o professor abriu e, dentro do lobby, pode criar o jogo online."
 theme_override_font_sizes/font_size = 26
-text = "ENTRAR NO JOGO"
+text = "ENTRAR COMO ALUNO"
 
 [node name="Footer" type="Label" parent="."]
 layout_mode = 1

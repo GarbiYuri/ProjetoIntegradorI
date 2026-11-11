@@ -171,6 +171,7 @@ public class AlunoService
         return aluno;
     }
     private static bool _enviandoPersona = false;
+    private static bool _ouvindoAnuncios = false;
 
     public static void SendMyPersona(int id)
     {
@@ -210,5 +211,72 @@ public class AlunoService
     public static void StopSendingPersona()
     {
         _enviandoPersona = false;
+    }
+
+    /// <summary>
+    /// Fica ouvindo os anúncios do professor (DESCOBERTA_SERVIDOR) e avisa a
+    /// tela a cada atualização. É o que mantém a lista de alunos da sala e o
+    /// cartão da sessão atualizados ao vivo enquanto o aluno espera.
+    ///
+    /// Para parar: <see cref="PararDeOuvirAnuncios"/>.
+    /// </summary>
+    public static async Task OuvirAnuncios(Action<NetworkPacket> aoReceber)
+    {
+        _ouvindoAnuncios = true;
+
+        Action<string, string>? tratarMensagemUDP = null;
+
+        tratarMensagemUDP = (senderIP, jsonRecebido) =>
+        {
+            try
+            {
+                var pacote = JsonSerializer.Deserialize<NetworkPacket>(jsonRecebido);
+
+                if (pacote == null || pacote.Tipo != "DESCOBERTA_SERVIDOR")
+                {
+                    return;
+                }
+
+                pacote.senderIP = senderIP;
+                aoReceber(pacote);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[ALUNO] Anúncio inválido: " + e.Message);
+            }
+        };
+
+        BroadcastUDP.OnMessageReceived += tratarMensagemUDP;
+        _ = Task.Run(() => BroadcastUDP.StartListeningAluno());
+
+        Console.WriteLine("[ALUNO] Escutando anuncios do professor (ouvinte registrado).");
+
+        while (_ouvindoAnuncios)
+        {
+            await Task.Delay(150);
+        }
+
+        BroadcastUDP.OnMessageReceived -= tratarMensagemUDP;
+        BroadcastUDP.StopListening();
+    }
+
+    /// <summary>Para a escuta de anúncios (usar ao sair da tela).</summary>
+    public static void PararDeOuvirAnuncios()
+    {
+        _ouvindoAnuncios = false;
+    }
+
+    /// <summary>
+    /// Liga a conta do aluno à sala em que ele entrou (aparece na lista de
+    /// alunos vinculados à sala).
+    /// </summary>
+    public static async Task VincularAoLobby(int alunoId, int salaId)
+    {
+        if (salaId <= 0)
+        {
+            return;
+        }
+
+        await AlunoDB.VincularSala(alunoId, salaId);
     }
 }

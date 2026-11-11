@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Game.Scripts;
 using Models;
@@ -12,6 +13,8 @@ public partial class AlunoEntrar : Control
 	private Label _status;
 	private Button _retryButton;
 	private Button _backButton;
+	private VBoxContainer _alunosList;
+	private Label _alunosVazio;
 
 	private SessionManager _session;
 
@@ -20,6 +23,15 @@ public partial class AlunoEntrar : Control
 	private string _sessaoIp = "127.0.0.1";
 	private string _sessaoProfessor = "Professor";
 	private string _sessaoSala = "Sala";
+	private int _sessaoSalaId;
+	private int _sessaoPorta;
+
+	// Dados que chegam da rede (thread do UDP): a interface é atualizada
+	// na thread principal, no _Process.
+	private readonly List<AlunoOnline> _alunos = new();
+	private bool _temSessao;
+	private bool _atualizarInterface;
+	private bool _conectouBanco;
 
 	public override void _Ready()
 	{
@@ -27,18 +39,36 @@ public partial class AlunoEntrar : Control
 		_status = GetNode<Label>("%StatusLabel");
 		_retryButton = GetNode<Button>("%RetryButton");
 		_backButton = GetNode<Button>("%BackButton");
+		_alunosList = GetNode<VBoxContainer>("%AlunosList");
+		_alunosVazio = GetNode<Label>("%AlunosVazio");
 
 		_session = GetNode<SessionManager>("/root/SessionManager");
 
 		_retryButton.Pressed += OnRetryPressed;
 		_backButton.Pressed += OnBackPressed;
 
-		_ = BuscarSessoes();
+		_status.Text = "Procurando sessões na rede local...";
+
+		// Fica ouvindo o professor: a sessão e a lista de alunos da sala
+		// são atualizadas sozinhas enquanto o aluno espera.
+		_ = AlunoService.OuvirAnuncios(AoReceberAnuncio);
 	}
 
-	private async void OnRetryPressed()
+	public override void _Process(double delta)
 	{
-		await BuscarSessoes();
+		if (!_atualizarInterface)
+		{
+			return;
+		}
+
+		_atualizarInterface = false;
+		AtualizarInterface();
+	}
+
+	private void OnRetryPressed()
+	{
+		// A escuta é contínua; o botão só força uma nova leitura da tela.
+		_atualizarInterface = true;
 	}
 
 	private void OnBackPressed()
@@ -46,93 +76,69 @@ public partial class AlunoEntrar : Control
 		GetTree().ChangeSceneToFile("res://Scenes/InitialScene.tscn");
 	}
 
-	private async System.Threading.Tasks.Task BuscarSessoes()
+	/// <summary>
+	/// Recebe o anúncio do professor (roda fora da thread principal).
+	/// </summary>
+	private void AoReceberAnuncio(NetworkPacket pacote)
 	{
-		if (_buscando)
-		{
-			return;
-		}
-
-		_buscando = true;
-		DefinirCarregando(true);
-		LimparSessoes();
-		_status.Text = "Procurando sessões na rede local...";
-
-		NetworkPacket pacote;
-
-		try
-		{
-			pacote = await AlunoService.enterGame();
-		}
-		catch (Exception e)
-		{
-			GD.PrintErr("[ALUNO] Falha ao procurar sessão: " + e.Message);
-
-			if (IsInstanceValid(this) && IsInsideTree())
-			{
-				_status.Text = "Não foi possível conectar ao servidor do professor. " +
-							   "Confira se o banco está ativo e tente novamente.";
-				DefinirCarregando(false);
-			}
-
-			_buscando = false;
-			return;
-		}
-
-		if (!IsInstanceValid(this) || !IsInsideTree())
-		{
-			_buscando = false;
-			return;
-		}
-
-		if (pacote == null)
-		{
-			_status.Text = "Nenhuma sessão encontrada. Peça ao professor para abrir a sala e tente novamente.";
-			DefinirCarregando(false);
-			_buscando = false;
-			return;
-		}
-
 		try
 		{
 			LerSessao(pacote);
-			CriarCartaoSessao();
-			_status.Text = "Sessão encontrada! Clique em ENTRAR para escolher seu personagem.";
-			GD.Print($"[ALUNO] Sessão recebida: sala '{_sessaoSala}', professor '{_sessaoProfessor}', IP {_sessaoIp}.");
+			_atualizarInterface = true;
+
+			// O banco do professor é usado para criar/acessar a conta.
+			_ = ConectarBanco();
 		}
 		catch (Exception e)
 		{
-			GD.PrintErr("[ALUNO] Sessão recebida, mas os dados não puderam ser lidos: " + e.Message);
-			_status.Text = "A sessão foi encontrada, mas os dados recebidos estão incompletos. Tente novamente.";
+			GD.PrintErr("[ALUNO] Anúncio inválido: " + e.Message);
+		}
+	}
+
+	private async System.Threading.Tasks.Task ConectarBanco()
+	{
+		if (_conectouBanco)
+		{
+			return;
 		}
 
-		DefinirCarregando(false);
-		_buscando = false;
+		_conectouBanco = true;
+
+		try
+		{
+			if (_sessaoPorta > 0)
+			{
+				DB.DefinirPorta(_sessaoPorta);
+			}
+
+			await DB.Connect(_sessaoIp, iniciarLocal: false);
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr("[ALUNO] Não foi possível conectar ao banco do professor: " + e.Message);
+			_conectouBanco = false;
+		}
 	}
 
 	private void LerSessao(NetworkPacket pacote)
 	{
 		_sessaoIp = pacote.senderIP;
-		_sessaoProfessor = "Professor";
-		_sessaoSala = "Sala sem nome";
 
-		using JsonDocument docExterior = JsonDocument.Parse(pacote.DadosJson);
-		JsonElement raiz = docExterior.RootElement;
+		using JsonDocument doc = JsonDocument.Parse(pacote.DadosJson);
+		JsonElement raiz = doc.RootElement;
 
-		if (!raiz.TryGetProperty("DadosJson", out JsonElement dadosElement))
+		// O anúncio pode vir como payload direto ou dentro do envelope
+		// antigo (que tinha um "DadosJson" dentro de outro).
+		if (raiz.TryGetProperty("DadosJson", out JsonElement envelope) &&
+			envelope.ValueKind == JsonValueKind.String &&
+			!string.IsNullOrWhiteSpace(envelope.GetString()))
 		{
-			return;
-		}
-
-		string jsonInterno = dadosElement.GetString();
-
-		if (string.IsNullOrWhiteSpace(jsonInterno))
-		{
-			return;
+			using JsonDocument docInterno = JsonDocument.Parse(envelope.GetString()!);
+			raiz = docInterno.RootElement;
 		}
 
 		var opcoes = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-		Dados dados = JsonSerializer.Deserialize<Dados>(jsonInterno, opcoes);
+		Dados dados = JsonSerializer.Deserialize<Dados>(raiz.GetRawText(), opcoes);
 
 		if (!string.IsNullOrWhiteSpace(dados.Message))
 		{
@@ -147,6 +153,61 @@ public partial class AlunoEntrar : Control
 		{
 			_sessaoSala = _session.roomName;
 		}
+
+		_sessaoSalaId = dados.SalaId;
+		_sessaoPorta = dados.Port;
+
+		// O IP vem no anúncio (é sempre o mesmo); o endereço de quem enviou
+		// serve só de reserva.
+		if (!string.IsNullOrWhiteSpace(dados.HostIp))
+		{
+			_sessaoIp = dados.HostIp.Trim();
+		}
+
+		// Lista de alunos que já estão na sala (enviada pelo professor).
+		_alunos.Clear();
+
+		if (dados.Alunos != null)
+		{
+			foreach (AlunoOnline aluno in dados.Alunos)
+			{
+				_alunos.Add(aluno);
+			}
+		}
+
+		_temSessao = true;
+
+		// Guarda na sessão o id da sala (liga a conta do aluno à sala).
+		if (_session != null && _sessaoSalaId > 0)
+		{
+			_session.salaId = _sessaoSalaId;
+		}
+	}
+
+	// ------------------------------------------------------------------
+	// Interface
+	// ------------------------------------------------------------------
+
+	private void AtualizarInterface()
+	{
+		if (!IsInstanceValid(this) || !IsInsideTree())
+		{
+			return;
+		}
+
+		if (!_temSessao)
+		{
+			_status.Text = "Procurando sessões na rede local...";
+			return;
+		}
+
+		_status.Text = $"Sessão de \"{_sessaoSala}\" encontrada! Entre para escolher seu personagem.";
+		GD.Print($"[ALUNO] Sessão: sala '{_sessaoSala}', professor '{_sessaoProfessor}', IP {_sessaoIp}, " +
+				 $"alunos na sala: {_alunos.Count}.");
+
+		LimparSessoes();
+		CriarCartaoSessao();
+		AtualizarListaAlunos();
 	}
 
 	private void CriarCartaoSessao()
@@ -200,6 +261,36 @@ public partial class AlunoEntrar : Control
 		_sessoes.AddChild(cartao);
 	}
 
+	/// <summary>Lista dos alunos que já estão conectados naquela sala.</summary>
+	private void AtualizarListaAlunos()
+	{
+		foreach (Node linha in _alunosList.GetChildren())
+		{
+			_alunosList.RemoveChild(linha);
+			linha.QueueFree();
+		}
+
+		_alunosVazio.Visible = _alunos.Count == 0;
+
+		foreach (AlunoOnline aluno in _alunos)
+		{
+			var cartao = UIHelpers.Cartao();
+			var linha = UIHelpers.Linha();
+
+			linha.AddChild(UIHelpers.TextoExpandido(aluno.Nome, 17));
+
+			if (!string.IsNullOrWhiteSpace(aluno.Nick))
+			{
+				linha.AddChild(UIHelpers.TextoSuaveLabel(aluno.Nick, 15));
+			}
+
+			linha.AddChild(UIHelpers.SeloStatus("ONLINE"));
+
+			cartao.AddChild(linha);
+			_alunosList.AddChild(cartao);
+		}
+	}
+
 	private void OnEntrarPressed()
 	{
 		if (_session == null)
@@ -212,6 +303,7 @@ public partial class AlunoEntrar : Control
 		_session.lobbyIp = _sessaoIp;
 		_session.hostName = _sessaoProfessor;
 		_session.roomName = _sessaoSala;
+		_session.salaId = _sessaoSalaId;
 		_session.lobbyMode = LobbyMode.Client;
 
 		Error resultado = GetTree().ChangeSceneToFile("res://Scenes/Forms/AlunoConta.tscn");
@@ -220,12 +312,6 @@ public partial class AlunoEntrar : Control
 		{
 			GD.PrintErr("Erro ao abrir a tela de conta: " + resultado);
 		}
-	}
-
-	private void DefinirCarregando(bool carregando)
-	{
-		_retryButton.Disabled = carregando;
-		_retryButton.Text = carregando ? "PROCURANDO..." : "PROCURAR NOVAMENTE";
 	}
 
 	private void LimparSessoes()
@@ -238,6 +324,7 @@ public partial class AlunoEntrar : Control
 
 	public override void _ExitTree()
 	{
+		AlunoService.PararDeOuvirAnuncios();
 		BroadcastUDP.StopListening();
 	}
 
@@ -246,5 +333,9 @@ public partial class AlunoEntrar : Control
 		public string Status { get; set; }
 		public string Message { get; set; }
 		public string Room { get; set; }
+		public int Port { get; set; }
+		public int SalaId { get; set; }
+		public string HostIp { get; set; }
+		public List<AlunoOnline> Alunos { get; set; }
 	}
 }

@@ -24,6 +24,9 @@ public partial class Personagem : Node2D
 	[Export] public string SyncAnimation { get; set; } = "idleDown";
 	[Export] public string PlayerName { get; set; } = "Jogador";
 
+	/// <summary>Nick escolhido pelo aluno (aparece na lista da sala).</summary>
+	[Export] public string PlayerNick { get; set; } = "";
+
 	/// <summary>
 	/// Cor do personagem (escolhida na tela de conta). É sincronizada pelo
 	/// MultiplayerSynchronizer, então a cor aparece para todos na rede.
@@ -66,6 +69,7 @@ public partial class Personagem : Node2D
 				// Cor escolhida na tela de conta (fica na sessão local e
 				// replica para os outros via SyncColor).
 				SyncColor = _session.GetPersonagemColor();
+				PlayerNick = _session.playerNick ?? string.Empty;
 			}
 		}
 

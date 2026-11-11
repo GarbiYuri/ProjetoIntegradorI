@@ -281,6 +281,7 @@ public partial class AlunoConta : Control
 		GD.Print($"[ALUNO] Conta pronta: {aluno.name} (id {aluno.id}). Indo para o lobby.");
 
 		_session.playerName = aluno.name;
+		_session.playerNick = aluno.username ?? string.Empty;
 		_session.personagemColorHex = _corEscolhida.ToHtml(false);
 		_session.lobbyMode = LobbyMode.Client;
 
@@ -298,6 +299,9 @@ public partial class AlunoConta : Control
 
 		_session.lobbyIp = professorIp;
 
+		// Liga a conta à sala (a sala mostra quem está vinculado a ela).
+		_ = VincularContaASala(aluno.id);
+
 		AlunoService.SendMyPersona(aluno.id);
 
 		Error resultado = GetTree().ChangeSceneToFile("res://Scenes/Personagem/LobbyPrincipal.tscn");
@@ -305,6 +309,18 @@ public partial class AlunoConta : Control
 		if (resultado != Error.Ok)
 		{
 			GD.PrintErr("[ALUNO] Erro ao abrir o lobby: " + resultado);
+		}
+	}
+
+	private async System.Threading.Tasks.Task VincularContaASala(int alunoId)
+	{
+		try
+		{
+			await AlunoService.VincularAoLobby(alunoId, _session.salaId);
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr("[ALUNO] Não foi possível vincular a conta à sala: " + e.Message);
 		}
 	}
 

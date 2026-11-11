@@ -532,6 +532,19 @@ public class DB
             password varchar(255),
             created_at timestamp
         );
+
+        -- Tabela de Jogos (conexões internas criadas pelos alunos dentro do lobby)
+        CREATE TABLE IF NOT EXISTS jogos (
+            id SERIAL primary key,
+            name varchar(255) not null,
+            id_sala INTEGER references salas(id) on delete set null,
+            id_aluno INTEGER references alunos(id) on delete set null,
+            creator varchar(255),
+            host_ip varchar(255),
+            port INTEGER DEFAULT 7778,
+            status varchar(32) DEFAULT 'ABERTO',
+            created_at timestamp
+        );
     ");
 
         await cmd.ExecuteNonQueryAsync();
