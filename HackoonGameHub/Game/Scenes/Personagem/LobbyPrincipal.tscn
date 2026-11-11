@@ -1,25 +1,664 @@
-[gd_scene format=3 uid="uid://bvtwy4yjfe7gd"]
+[gd_scene load_steps=15 format=3 uid="uid://bvtwy4yjfe7gd"]
 
-[ext_resource type="Script" uid="uid://bochi1hpem50w" path="res://Scripts/Personagem/LobbyPrincipal.cs" id="1_or4vn"]
-[ext_resource type="PackedScene" uid="uid://2xapy6q32s6t" path="res://Scenes/Personagem/Personagem.tscn" id="2_38idv"]
+[ext_resource type="Script" uid="uid://bochi1hpem50w" path="res://Scripts/Personagem/LobbyPrincipal.cs" id="1_lobby"]
+[ext_resource type="PackedScene" uid="uid://2xapy6q32s6t" path="res://Scenes/Personagem/Personagem.tscn" id="2_player"]
+[ext_resource type="Theme" path="res://Assets/Theme/HackoonTheme.tres" id="3_theme"]
 
-[node name="LobbyPrincipal" type="Node2D" unique_id=980075694 node_paths=PackedStringArray("multiplayerSpawner")]
-script = ExtResource("1_or4vn")
-playerScene = ExtResource("2_38idv")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.07058824, 0.08627451, 0.12941177, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.48235294, 0.5058824, 0.5803922, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+content_margin_left = 34.0
+content_margin_top = 28.0
+content_margin_right = 34.0
+content_margin_bottom = 28.0
+bg_color = Color(0.07450981, 0.08627451, 0.12156863, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.7607843, 0.7764706, 0.8, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 14
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font_size = 42
+font_color = Color(1, 0.90588236, 0.3137255, 1)
+shadow_size = 8
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_offset = Vector2(3, 3)
+
+[sub_resource type="LabelSettings" id="LabelSettings_subtitle"]
+font_size = 17
+font_color = Color(0.8156863, 0.83137256, 0.8784314, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_room"]
+font_size = 26
+font_color = Color(1, 1, 1, 1)
+shadow_size = 4
+shadow_color = Color(0, 0, 0, 0.4)
+
+[sub_resource type="LabelSettings" id="LabelSettings_status"]
+font_size = 15
+font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_hint"]
+font_size = 15
+font_color = Color(0.84705883, 0.8666667, 0.9137255, 1)
+shadow_size = 4
+shadow_color = Color(0, 0, 0, 0.7)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_danger"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.32156864, 0.12156863, 0.14901961, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6509804, 0.27058825, 0.3019608, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_danger_hover"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.4509804, 0.15686275, 0.1882353, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.9490196, 0.4, 0.4, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iniciar"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.9490196, 0.7647059, 0.3019608, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.8862745, 0.5019608, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iniciar_hover"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 0.8862745, 0.5019608, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.8862745, 0.5019608, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="LobbyPrincipal" type="Node2D" node_paths=PackedStringArray("multiplayerSpawner")]
+script = ExtResource("1_lobby")
+playerScene = ExtResource("2_player")
 multiplayerSpawner = NodePath("MultiplayerSpawner")
+playerBounds = Rect2(-560, -300, 1120, 600)
 
-[node name="UI" type="VBoxContainer" parent="." unique_id=1796147774]
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="World" type="Node2D" parent="."]
 
-[node name="hostButton" type="Button" parent="UI" unique_id=1612620156]
-layout_mode = 2
-text = "HOSPEDAR"
+[node name="Backdrop" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-3000, -3000, 3000, -3000, 3000, 3000, -3000, 3000)
+color = Color(0.047058824, 0.05882353, 0.08627451, 1)
 
-[node name="entrarButton" type="Button" parent="UI" unique_id=508409210]
-layout_mode = 2
-text = "ENTRAR"
+[node name="Floor" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-600, -340, 600, -340, 600, 340, -600, 340)
+color = Color(0.20392157, 0.23137255, 0.3019608, 1)
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=975260951]
+[node name="FloorInner" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-580, -320, 580, -320, 580, 320, -580, 320)
+color = Color(0.23137255, 0.2627451, 0.34117648, 1)
+
+[node name="Rug" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-250, -170, 250, -170, 250, 170, -250, 170)
+color = Color(0.29411766, 0.24705882, 0.3882353, 1)
+
+[node name="RugBorder" type="Line2D" parent="World"]
+points = PackedVector2Array(-250, -170, 250, -170, 250, 170, -250, 170, -250, -170)
+width = 6.0
+default_color = Color(0.39607844, 0.3372549, 0.5019608, 1)
+
+[node name="WallTop" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-640, -380, 640, -380, 640, -340, -640, -340)
+color = Color(0.11764706, 0.13725491, 0.1882353, 1)
+
+[node name="WallBottom" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-640, 340, 640, 340, 640, 380, -640, 380)
+color = Color(0.11764706, 0.13725491, 0.1882353, 1)
+
+[node name="WallLeft" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-640, -380, -600, -340, -600, 340, -640, 380)
+color = Color(0.11764706, 0.13725491, 0.1882353, 1)
+
+[node name="WallRight" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(600, -340, 640, -380, 640, 380, 600, 340)
+color = Color(0.11764706, 0.13725491, 0.1882353, 1)
+
+[node name="Stage" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-230, -330, 230, -330, 230, -270, -230, -270)
+color = Color(0.3882353, 0.30588236, 0.49803922, 1)
+
+[node name="StageTop" type="Polygon2D" parent="World"]
+polygon = PackedVector2Array(-230, -330, 230, -330, 230, -315, -230, -315)
+color = Color(0.5019608, 0.41568628, 0.61960787, 1)
+
+[node name="Furniture" type="Node2D" parent="World"]
+
+[node name="Table" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(0, 10)
+polygon = PackedVector2Array(-110, -55, 110, -55, 110, 55, -110, 55)
+color = Color(0.42352942, 0.29411766, 0.19607843, 1)
+
+[node name="TableTop" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(0, 10)
+polygon = PackedVector2Array(-98, -43, 98, -43, 98, 43, -98, 43)
+color = Color(0.5568628, 0.39607844, 0.27058825, 1)
+
+[node name="ChairTop" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(0, -95)
+polygon = PackedVector2Array(-35, -22, 35, -22, 35, 22, -35, 22)
+color = Color(0.3764706, 0.25882354, 0.1764706, 1)
+
+[node name="ChairBottom" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(0, 115)
+polygon = PackedVector2Array(-35, -22, 35, -22, 35, 22, -35, 22)
+color = Color(0.3764706, 0.25882354, 0.1764706, 1)
+
+[node name="ChairLeft" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(-155, 10)
+polygon = PackedVector2Array(-22, -35, 22, -35, 22, 35, -22, 35)
+color = Color(0.3764706, 0.25882354, 0.1764706, 1)
+
+[node name="ChairRight" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(155, 10)
+polygon = PackedVector2Array(-22, -35, 22, -35, 22, 35, -22, 35)
+color = Color(0.3764706, 0.25882354, 0.1764706, 1)
+
+[node name="PlantPot1" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(-520, -240)
+polygon = PackedVector2Array(-22, 0, 22, 0, 16, 30, -16, 30)
+color = Color(0.5411765, 0.3529412, 0.23529412, 1)
+
+[node name="PlantLeaves1" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(-520, -250)
+polygon = PackedVector2Array(0, -60, 26, -26, 40, 4, 12, -6, 0, 12, -12, -6, -40, 4, -26, -26)
+color = Color(0.18431373, 0.43137255, 0.30980393, 1)
+
+[node name="PlantPot2" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(520, -240)
+polygon = PackedVector2Array(-22, 0, 22, 0, 16, 30, -16, 30)
+color = Color(0.5411765, 0.3529412, 0.23529412, 1)
+
+[node name="PlantLeaves2" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(520, -250)
+polygon = PackedVector2Array(0, -60, 26, -26, 40, 4, 12, -6, 0, 12, -12, -6, -40, 4, -26, -26)
+color = Color(0.18431373, 0.43137255, 0.30980393, 1)
+
+[node name="PlantPot3" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(-520, 240)
+polygon = PackedVector2Array(-22, 0, 22, 0, 16, 30, -16, 30)
+color = Color(0.5411765, 0.3529412, 0.23529412, 1)
+
+[node name="PlantLeaves3" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(-520, 230)
+polygon = PackedVector2Array(0, -60, 26, -26, 40, 4, 12, -6, 0, 12, -12, -6, -40, 4, -26, -26)
+color = Color(0.18431373, 0.43137255, 0.30980393, 1)
+
+[node name="PlantPot4" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(520, 240)
+polygon = PackedVector2Array(-22, 0, 22, 0, 16, 30, -16, 30)
+color = Color(0.5411765, 0.3529412, 0.23529412, 1)
+
+[node name="PlantLeaves4" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(520, 230)
+polygon = PackedVector2Array(0, -60, 26, -26, 40, 4, 12, -6, 0, 12, -12, -6, -40, 4, -26, -26)
+color = Color(0.18431373, 0.43137255, 0.30980393, 1)
+
+[node name="Sofa" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(0, 270)
+polygon = PackedVector2Array(-150, -30, 150, -30, 150, 30, -150, 30)
+color = Color(0.28627452, 0.3764706, 0.49803922, 1)
+
+[node name="SofaBack" type="Polygon2D" parent="World/Furniture"]
+position = Vector2(0, 290)
+polygon = PackedVector2Array(-150, -12, 150, -12, 150, 18, -150, 18)
+color = Color(0.34901962, 0.45490196, 0.5882353, 1)
+
+[node name="Jogos" type="Node2D" parent="World"]
+
+[node name="SpawnPoint" type="Marker2D" parent="World"]
+position = Vector2(0, 190)
+
+[node name="Players" type="Node2D" parent="World"]
+y_sort_enabled = true
+
+[node name="HostCamera" type="Camera2D" parent="."]
+enabled = false
+zoom = Vector2(0.9, 0.9)
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://2xapy6q32s6t")
-spawn_path = NodePath("..")
+spawn_path = NodePath("../World/Players")
+
+[node name="RetryTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Hud" type="Control" parent="CanvasLayer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_theme")
+
+[node name="RoomPanel" type="PanelContainer" parent="CanvasLayer/Hud"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 360.0
+offset_bottom = 122.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Hud/RoomPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RoomLabel" type="Label" parent="CanvasLayer/Hud/RoomPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Lobby"
+label_settings = SubResource("LabelSettings_room")
+
+[node name="StatusLabel" type="Label" parent="CanvasLayer/Hud/RoomPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Aguardando conexão..."
+label_settings = SubResource("LabelSettings_status")
+
+[node name="PlayersPanel" type="PanelContainer" parent="CanvasLayer/Hud"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 122.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Hud/PlayersPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayersLabel" type="Label" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Jogadores: 0"
+horizontal_alignment = 1
+
+[node name="PainelButton" type="Button" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "PAINEL"
+
+[node name="LeaveButton" type="Button" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "SAIR DO LOBBY"
+
+[node name="JogosPanel" type="PanelContainer" parent="CanvasLayer/Hud"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+offset_left = 20.0
+offset_top = 140.0
+offset_right = 400.0
+offset_bottom = 430.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Titulo" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 18
+text = "JOGOS ONLINE"
+
+[node name="CriarRow" type="HBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="JogoNomeEdit" type="LineEdit" parent="CanvasLayer/Hud/JogosPanel/VBox/CriarRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Nome do seu jogo"
+
+[node name="CriarJogoButton" type="Button" parent="CanvasLayer/Hud/JogosPanel/VBox/CriarRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_iniciar")
+theme_override_styles/hover = SubResource("StyleBoxFlat_iniciar_hover")
+text = "CRIAR"
+
+[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="JogosList" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="JogoStatus" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
+theme_override_font_sizes/font_size = 14
+text = "Nenhum jogo criado ainda."
+autowrap_mode = 2
+
+[node name="SairJogoButton" type="Button" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "SAIR DO JOGO"
+
+[node name="HintLabel" type="Label" parent="CanvasLayer/Hud"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -54.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Use WASD ou as setas para se movimentar."
+label_settings = SubResource("LabelSettings_hint")
+horizontal_alignment = 1
+
+[node name="Dashboard" type="Control" parent="CanvasLayer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_theme")
+
+[node name="Panel" type="PanelContainer" parent="CanvasLayer/Dashboard"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 438.0
+offset_bottom = -24.0
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Eyebrow" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 14
+text = "PAINEL DO PROFESSOR"
+
+[node name="DashboardRoom" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 28
+text = "Sala"
+autowrap_mode = 2
+
+[node name="DashboardStatus" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
+theme_override_font_sizes/font_size = 15
+text = "Sessão aberta • porta 7777"
+autowrap_mode = 2
+
+[node name="Separator" type="HSeparator" parent="CanvasLayer/Dashboard/Panel/VBox"]
+layout_mode = 2
+
+[node name="PlayersHeader" type="HBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
+layout_mode = 2
+
+[node name="PlayersTitle" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/PlayersHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 14
+text = "ALUNOS CONECTADOS"
+
+[node name="DashboardCount" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/PlayersHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7411765, 0.7882353, 0.8862745, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+horizontal_alignment = 2
+
+[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DashboardPlayers" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="DashboardEmpty" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 16
+text = "Nenhum aluno conectado ainda."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Separator2" type="HSeparator" parent="CanvasLayer/Dashboard/Panel/VBox"]
+layout_mode = 2
+
+[node name="JogosTitle" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.70980394, 0.7607843, 0.8666667, 1)
+theme_override_font_sizes/font_size = 14
+text = "JOGOS CRIADOS PELOS ALUNOS"
+
+[node name="DashboardJogos" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DashboardJogosEmpty" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 15
+text = "Nenhum jogo aberto pelos alunos."
+autowrap_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="IniciarJogoButton" type="Button" parent="CanvasLayer/Dashboard/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.078431375, 0.08627451, 0.10980392, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/hover = SubResource("StyleBoxFlat_iniciar_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_iniciar")
+text = "INICIAR JOGO"
+
+[node name="EndSessionButton" type="Button" parent="CanvasLayer/Dashboard/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.73333335, 0.73333335, 1)
+theme_override_styles/hover = SubResource("StyleBoxFlat_danger_hover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_danger")
+text = "ENCERRAR CONEXÃO"
+
+[node name="DashboardLeaveButton" type="Button" parent="CanvasLayer/Dashboard/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "SAIR"
+
+[node name="StartOverlay" type="Control" parent="CanvasLayer"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_theme")
+
+[node name="Dim" type="ColorRect" parent="CanvasLayer/StartOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.023529412, 0.03137255, 0.047058824, 0.72)
+
+[node name="Center" type="CenterContainer" parent="CanvasLayer/StartOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CanvasLayer/StartOverlay/Center"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/StartOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="CanvasLayer/StartOverlay/Center/Panel/VBox"]
+layout_mode = 2
+text = "HACKOON GAME HUB"
+label_settings = SubResource("LabelSettings_title")
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CanvasLayer/StartOverlay/Center/Panel/VBox"]
+layout_mode = 2
+text = "Crie sua sala ou entre na sessão do professor."
+label_settings = SubResource("LabelSettings_subtitle")
+horizontal_alignment = 1
+
+[node name="IpLabel" type="Label" parent="CanvasLayer/StartOverlay/Center/Panel/VBox"]
+layout_mode = 2
+text = "IP do servidor:"
+
+[node name="IpEdit" type="LineEdit" parent="CanvasLayer/StartOverlay/Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Ex: 192.168.0.10"
+text = "127.0.0.1"
+alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="CanvasLayer/StartOverlay/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="SoloButton" type="Button" parent="CanvasLayer/StartOverlay/Center/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "JOGAR SOZINHO"
+
+[node name="HostButton" type="Button" parent="CanvasLayer/StartOverlay/Center/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HOSPEDAR SALA"
+
+[node name="JoinButton" type="Button" parent="CanvasLayer/StartOverlay/Center/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ENTRAR EM SALA"
+
+[node name="MessageLabel" type="Label" parent="CanvasLayer/StartOverlay/Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Escolha como entrar no lobby."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="BackButton" type="Button" parent="CanvasLayer/StartOverlay/Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "VOLTAR AO MENU"

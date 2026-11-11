@@ -1,19 +1,8 @@
-[gd_scene format=3 uid="uid://bt3r5lfr5c4lx"]
+[gd_scene load_steps=5 format=3 uid="uid://bt3r5lfr5c4lx"]
 
 [ext_resource type="PackedScene" uid="uid://p4vbm24vx8pn" path="res://Scenes/Backgrounds/backgroundNode.tscn" id="1_63avd"]
 [ext_resource type="Script" uid="uid://dc6a827fke7ul" path="res://Scripts/SceneControlls/FormsAlunos.cs" id="1_m3vxr"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m3vxr"]
-bg_color = Color(0.5921569, 0.6039216, 0.58431375, 1)
-border_width_left = 10
-border_width_top = 10
-border_width_right = 10
-border_width_bottom = 10
-border_color = Color(0.5921569, 0.6039216, 0.58431375, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[ext_resource type="Theme" path="res://Assets/Theme/HackoonTheme.tres" id="2_theme"]
 
 [node name="AlunoForms" type="Control" unique_id=338835999]
 layout_mode = 3
@@ -22,58 +11,115 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_m3vxr")
 
 [node name="InicialBackground" parent="." unique_id=1272133862 instance=ExtResource("1_63avd")]
 layout_mode = 1
 
-[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1985414397]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_m3vxr")
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 32
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=1445286227]
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer"]
 layout_mode = 2
 
-[node name="alunosHBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=133637744]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/CenterContainer"]
+custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
 
-[node name="nomeVBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/alunosHBoxContainer" unique_id=1510519472]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 32
+text = "Escolha seu personagem"
+horizontal_alignment = 1
+
+[node name="SessaoLabel" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.70980394, 0.7607843, 0.8666667, 1)
+theme_override_font_sizes/font_size = 16
+text = "Sessão"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/alunosHBoxContainer/nomeVBoxContainer" unique_id=655965120]
+[node name="Header" type="HBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-text = "NOME"
+theme_override_constants/separation = 14
 
-[node name="sobrenomeVBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/alunosHBoxContainer" unique_id=716741632]
+[node name="NomeHeader" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 14
+text = "PERSONAGEM"
+
+[node name="UsuarioHeader" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 14
+text = "USUÁRIO"
+
+[node name="AcaoHeader" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/Header"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 14
+text = "AÇÃO"
+horizontal_alignment = 2
+
+[node name="Scroll" type="ScrollContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 230)
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="PanelContainer/VBoxContainer/alunosHBoxContainer/sobrenomeVBoxContainer" unique_id=578534486]
+[node name="AlunosList" type="VBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/Scroll"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "| SOBRENOME"
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
 
-[node name="buttonContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/alunosHBoxContainer" unique_id=339833968]
+[node name="EmptyLabel" type="Label" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 16
+text = "Nenhum personagem cadastrado ainda."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Separator2" type="HSeparator" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="PanelContainer/VBoxContainer/alunosHBoxContainer/buttonContainer" unique_id=232825577]
+[node name="Buttons" type="HBoxContainer" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-text = "| BUTTON"
+theme_override_constants/separation = 12
+alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=655318066]
+[node name="CreateButton" type="Button" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
+disabled = true
+text = "CRIAR PERSONAGEM (EM BREVE)"
 
-[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1079177408]
+[node name="BackButton" type="Button" parent="MarginContainer/CenterContainer/PanelContainer/VBoxContainer/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-text = "CRIAR PERSONAGEM"
+text = "VOLTAR"

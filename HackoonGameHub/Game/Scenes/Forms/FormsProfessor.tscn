@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://vj6uxrr44gy0" path="res://Scripts/SceneControlls/FormsProfessor.cs" id="1_sod4u"]
 [ext_resource type="PackedScene" uid="uid://p4vbm24vx8pn" path="res://Scenes/Backgrounds/backgroundNode.tscn" id="1_vhs78"]
 [ext_resource type="PackedScene" uid="uid://ietdf4bl0i6f" path="res://Scenes/Music/music_controll.tscn" id="2_lrydk"]
+[ext_resource type="Theme" path="res://Assets/Theme/HackoonTheme.tres" id="3_theme"]
 [ext_resource type="Texture2D" uid="uid://xccwqa2yj3o1" path="res://Assets/LoadingPacMan/1.png" id="4_ydjlr"]
 [ext_resource type="Texture2D" uid="uid://6ughrrgs6jnn" path="res://Assets/LoadingPacMan/2.png" id="5_oikks"]
 [ext_resource type="Texture2D" uid="uid://c40lmboe716tj" path="res://Assets/LoadingPacMan/3.png" id="6_hgcn4"]
@@ -151,6 +152,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("3_theme")
 script = ExtResource("1_sod4u")
 
 [node name="InicialBackgroundNode" parent="." unique_id=864878345 instance=ExtResource("1_vhs78")]
@@ -160,10 +162,24 @@ layout_mode = 1
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 23.0
+offset_top = 28.0
+offset_bottom = 72.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 30
-text = "Professores"
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 34
+text = "Área do professor"
+horizontal_alignment = 1
+
+[node name="subtituloLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 76.0
+offset_bottom = 104.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.81960785, 0.8509804, 0.9254902, 1)
+theme_override_font_sizes/font_size = 17
+text = "Entre ou cadastre-se para gerenciar suas salas"
 horizontal_alignment = 1
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=2022007553]
@@ -173,17 +189,16 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -128.0
-offset_top = -148.5
-offset_right = 128.0
-offset_bottom = 148.5
+offset_left = -220.0
+offset_top = -190.0
+offset_right = 220.0
+offset_bottom = 210.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_5i05s")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=802427831]
 layout_mode = 2
-theme_override_constants/separation = 13
+theme_override_constants/separation = 9
 
 [node name="nomeLabel" type="Label" parent="PanelContainer/VBoxContainer" unique_id=649953859]
 layout_mode = 2
@@ -208,40 +223,51 @@ text = "Senha:"
 [node name="textSenha" type="LineEdit" parent="PanelContainer/VBoxContainer" unique_id=1919983392]
 layout_mode = 2
 placeholder_text = "Ex: senha123"
+secret = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=518570099]
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_constants/separation = 8
 
 [node name="voltarButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1140414196]
 layout_mode = 2
+size_flags_horizontal = 3
 text = "VOLTAR"
 
 [node name="entrarButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=213316894]
 layout_mode = 2
+size_flags_horizontal = 3
 text = "ENTRAR"
 
 [node name="cadastrarButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=668077981]
 layout_mode = 2
+size_flags_horizontal = 3
 text = "CADASTRAR"
 
 [node name="MusicControll" parent="." unique_id=665168816 instance=ExtResource("2_lrydk")]
 layout_mode = 1
-offset_top = -208.0
-offset_bottom = -208.0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -110.0
+offset_top = 20.0
+offset_right = -30.0
+offset_bottom = 100.0
+grow_horizontal = 0
 scale = Vector2(0.18, 0.18)
 
 [node name="Carregamento" type="AnimatedSprite2D" parent="." unique_id=1459233376]
-position = Vector2(580, 323.09375)
-scale = Vector2(1.31125, 1.4990625)
+position = Vector2(576, 570)
+scale = Vector2(0.9, 1.0)
 sprite_frames = SubResource("SpriteFrames_4odks")
 frame_progress = 0.93679416
 
 [node name="returnLabel" type="Label" parent="." unique_id=225593142]
 layout_mode = 0
-offset_left = 450.0
-offset_top = 474.0
-offset_right = 698.0
-offset_bottom = 497.0
-theme_override_colors/font_color = Color(1, 0, 0, 1)
+offset_left = 376.0
+offset_top = 606.0
+offset_right = 776.0
+offset_bottom = 634.0
+theme_override_colors/font_color = Color(1, 0.47843137, 0.47843137, 1)
 horizontal_alignment = 1

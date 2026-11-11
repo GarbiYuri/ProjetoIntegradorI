@@ -11,6 +11,7 @@ public partial class FormsSalas : Control
 {
 	private VBoxContainer containerSalas;
 	private Label helloLabel;
+	private Label _emptyLabel;
 	
 	private Button saveButton;
 	private Button cancelarButton;
@@ -22,17 +23,39 @@ public partial class FormsSalas : Control
 
 	private bool _editing = false;
 
-	private Sala _salaToEdit; 
-	
+	private Sala _salaToEdit;
+
+	private void RedirecionarLogin()
+	{
+		Error resultado = GetTree().ChangeSceneToFile("res://Scenes/Forms/FormsProfessor.tscn");
+
+		if (resultado != Error.Ok)
+		{
+			GD.PrintErr("[SALAS] Não foi possível voltar para o login: " + resultado);
+		}
+	}
+
 	public override async void _Ready()
 	{
 		helloLabel = GetNode<Label>("helloLabel");
 		var session = GetNode<SessionManager>("/root/SessionManager");
-		Professor professor = (Professor) session.usuario;
-		
+
+		// Esta tela só existe dentro do fluxo do professor (login → salas).
+		// Se alguém abrir a cena sem sessão, volta para o login em vez de quebrar.
+		if (session.usuario is not Professor professor)
+		{
+			GD.PrintErr("[SALAS] Sem professor logado; voltando para o login.");
+			// CallDeferred: durante o _Ready a árvore ainda está montando os filhos.
+			CallDeferred(nameof(RedirecionarLogin));
+			return;
+		}
+
 		helloLabel.Text += professor.name;
+
+		_emptyLabel = GetNode<Label>("%EmptyLabel");
+		_emptyLabel.Visible = false;
 		
-		containerSalas = GetNode<VBoxContainer>("HBoxContainer/PanelSalas/containerSalas");
+		containerSalas = GetNode<VBoxContainer>("HBoxContainer/PanelSalas/VBoxSalas/containerSalas");
 		
 		saveButton = GetNode<Button>("HBoxContainer/PanelFormsSalas/VBoxContainer/HBoxContainer/salaButton");
 		cancelarButton = GetNode<Button>("HBoxContainer/PanelFormsSalas/VBoxContainer/HBoxContainer/cancelarButton");
@@ -44,7 +67,23 @@ public partial class FormsSalas : Control
 		cancelarButton.Pressed += OnCancelarPressed;
 		saveButton.Pressed += OnSavePressed;
 		
-		List<Sala> salas = await SalaService.ReadAll();
+		// Em um banco novo ainda não há salas; nesse caso a lista começa vazia
+		// em vez de impedir o professor de criar a primeira sala.
+		List<Sala> salas;
+		try
+		{
+			salas = await SalaService.ReadAll();
+		}
+		catch (ResourceNotFoundException)
+		{
+			salas = new List<Sala>();
+		}
+
+		if (!IsInstanceValid(this) || !IsInsideTree())
+		{
+			return;
+		}
+
 		foreach (Sala sala in salas)
 		{
 			if (sala != null)
@@ -70,6 +109,8 @@ public partial class FormsSalas : Control
 				popup.IdPressed += (idItemClicado) => OnPoputPressed(idItemClicado, sala);
 			}
 		}
+
+		_emptyLabel.Visible = salas.Count == 0;
 		
 		_window = GetNode<ReturnScene>("Control");
 		
@@ -143,6 +184,7 @@ public partial class FormsSalas : Control
 				containerSalas.AddChild(newButton);
 
 				popup.IdPressed += (idItemClicado) => OnPoputPressed(idItemClicado, sala);
+				_emptyLabel.Visible = false;
 			}
 			catch (InvalidParameterException e)
 			{
@@ -173,7 +215,18 @@ public partial class FormsSalas : Control
 		{
 			var session = GetNode<SessionManager>("/root/SessionManager");
 			session.sala = sala;
-			Error result = GetTree().ChangeSceneToFile("res://Scenes/LobbyPanel.tscn");
+			session.roomName = sala.name;
+			session.playerName = session.usuario?.name ?? "Professor";
+			session.lobbyMode = LobbyMode.Host;
+			session.lobbyIp = "127.0.0.1";
+
+			// Vai direto para o lobby: o painel do professor (dashboard) fica
+			// lá dentro e a sessão já nasce aberta para os alunos entrarem.
+			Error result = GetTree().ChangeSceneToFile("res://Scenes/Personagem/LobbyPrincipal.tscn");
+			if (result != Error.Ok)
+			{
+				GD.PrintErr("Erro ao abrir a sala: " + result);
+			}
 		}
 		else if (id == 1)
 		{

@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bgbrlwclpak18" path="res://Scripts/InitialScene.cs" id="1_t7kt1"]
 [ext_resource type="PackedScene" uid="uid://p4vbm24vx8pn" path="res://Scenes/Backgrounds/backgroundNode.tscn" id="2_ockli"]
 [ext_resource type="PackedScene" uid="uid://ietdf4bl0i6f" path="res://Scenes/Music/music_controll.tscn" id="3_i56i6"]
+[ext_resource type="Theme" path="res://Assets/Theme/HackoonTheme.tres" id="4_theme"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_wyath"]
 font_size = 56
@@ -31,6 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("4_theme")
 script = ExtResource("1_t7kt1")
 
 [node name="InicialBackgroundNode" parent="." unique_id=864878345 instance=ExtResource("2_ockli")]
@@ -48,36 +50,70 @@ text = "HACKOON GAME HUB"
 label_settings = SubResource("LabelSettings_wyath")
 horizontal_alignment = 1
 
-[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1276313470]
-self_modulate = Color(0.5411765, 0.5254902, 0.5294118, 0.6156863)
+[node name="Subtitle" type="Label" parent="."]
 layout_mode = 0
-offset_left = 418.0
-offset_top = 242.0
-offset_right = 734.0
-offset_bottom = 427.0
+offset_left = 280.0
+offset_top = 104.0
+offset_right = 872.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.81960785, 0.8509804, 0.9254902, 1)
+theme_override_font_sizes/font_size = 18
+text = "Aprenda jogando com a sua turma"
+horizontal_alignment = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1276313470]
+layout_mode = 0
+offset_left = 386.0
+offset_top = 232.0
+offset_right = 766.0
+offset_bottom = 448.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_wyath")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=1513776413]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_constants/separation = 33
+theme_override_constants/separation = 24
 alignment = 1
 
 [node name="StartButton" type="Button" parent="PanelContainer/VBoxContainer" unique_id=1337129972]
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "INICIAR JOGO"
+tooltip_text = "Só o professor cria a sala (lobby) e abre o jogo para a turma."
+theme_override_font_sizes/font_size = 26
+text = "SALA DO PROFESSOR"
 
 [node name="EnterButton" type="Button" parent="PanelContainer/VBoxContainer" unique_id=1625983789]
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "ENTRAR NO JOGO"
+tooltip_text = "O aluno entra na sala que o professor abriu e, dentro do lobby, pode criar o jogo online."
+theme_override_font_sizes/font_size = 26
+text = "ENTRAR COMO ALUNO"
+
+[node name="Footer" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -42.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 14
+text = "Projeto Integrador • Hackoon Game Hub"
+horizontal_alignment = 1
 
 [node name="MusicControll" parent="." unique_id=665168816 instance=ExtResource("3_i56i6")]
 layout_mode = 1
-offset_top = -124.0
-offset_bottom = -124.0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -110.0
+offset_top = 20.0
+offset_right = -30.0
+offset_bottom = 100.0
+grow_horizontal = 0
 scale = Vector2(0.18, 0.18)

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Npgsql;
 using Repository.Exceptions;
 
@@ -6,60 +7,497 @@ namespace Repository.Postgress;
 
 public class DB
 {
-    public static NpgsqlDataSource dataSource {get; private set;}
+    private const int PortaPadrao = 5432;
+    private const string MarcadorInicio = "# >>> HackoonGameHub";
+    private const string MarcadorFim = "# <<< HackoonGameHub";
+
+    private static readonly SemaphoreSlim _conexaoLock = new(1, 1);
+    private static int _porta = ResolverPorta();
+
+    private static string? _pgCtl;
+    private static string? _dataDir;
+    private static string? _logPath;
+    private static bool _servidorIniciadoPeloApp;
+
+    public static NpgsqlDataSource dataSource { get; private set; } = null!;
     public static bool conectado = false;
-    
-    //Funcão deve rodar apenas uma vez ao inciar o game e TEM QUE DAR CERTO
-    public static async Task<string> Connect(string ipServidor = "127.0.0.1")
+
+    public static int Porta => _porta;
+
+    /// <summary>
+    /// Ajusta a porta usada na conexão (o aluno recebe a porta do professor
+    /// pelo broadcast UDP). Só tem efeito antes de conectar.
+    /// </summary>
+    public static void DefinirPorta(int porta)
+    {
+        if (conectado)
+        {
+            return;
+        }
+
+        if (porta > 0 && porta <= 65535)
+        {
+            _porta = porta;
+        }
+    }
+
+    /// <summary>
+    /// Conecta ao PostgreSQL. No professor (127.0.0.1/localhost) o servidor
+    /// portátil (Windows ou Linux, conforme o SO) é iniciado automaticamente.
+    /// O aluno passa iniciarLocal = false: ele é cliente e conecta direto no
+    /// banco do professor pelo IP/porta recebidos no broadcast.
+    /// </summary>
+    public static async Task<string> Connect(string ipServidor = "127.0.0.1", bool iniciarLocal = true)
     {
         if (conectado)
         {
             return "Já Conectado";
         }
-        
-            //Inicia Database Postgres Portable (Somente Windows)
-            //isLocal(ipServidor, StartDatabase);//Somente Ip local roda
 
-            
-        
-        var connectionString = $"Host={ipServidor};Port=5432;Username=postgres;Database=postgres;Password=root1234"; // login do banco e local doo banco na rede
-        dataSource = NpgsqlDataSource.Create(connectionString); // Inicializa a conexão
-
-        int tentativas = 0;
-        while (!conectado)
+        await _conexaoLock.WaitAsync();
+        try
         {
-            try
+            if (conectado)
             {
-                //tenta conectar
-                await using var connection = await dataSource.OpenConnectionAsync();
-                //Cria Tabelas
-                await isLocalAsync(ipServidor,Setup); //Somente Em IP local de Conexão
-                conectado = true;
+                return "Já Conectado";
             }
-            catch (Exception e)
+
+            bool local = EhLocal(ipServidor) && iniciarLocal;
+
+            if (local)
             {
-                tentativas++;
-                if (tentativas == 10)
+                await IniciarServidorLocalAsync();
+            }
+
+            var connectionString =
+                $"Host={ipServidor};Port={_porta};Username=postgres;Database=postgres;Password=root1234";
+
+            dataSource = NpgsqlDataSource.Create(connectionString);
+
+            int tentativas = 0;
+            Exception? ultimoErro = null;
+
+            while (tentativas < 10)
+            {
+                try
                 {
-                    throw new Exception("O servidor Postgres está ativo, mas recusa conexões. Verifique o logfile.");
+                    await using var connection = await dataSource.OpenConnectionAsync();
+                    break;
                 }
-                //se der erro vai tentando a cada 1 Segundo
-                await Task.Delay(1000);
+                catch (Exception e)
+                {
+                    ultimoErro = e;
+                    tentativas++;
+
+                    if (tentativas >= 10)
+                    {
+                        dataSource.Dispose();
+                        dataSource = null!;
+
+                        string dica = local
+                            ? $" Verifique se a porta {_porta} já está em uso (por exemplo, um container Docker) e veja o log em {_logPath}."
+                            : " Verifique se o PostgreSQL do professor aceita conexões na rede.";
+
+                        throw new Exception(
+                            $"Não foi possível conectar ao PostgreSQL em {ipServidor}:{_porta}." + dica,
+                            ultimoErro);
+                    }
+
+                    await Task.Delay(1000);
+                }
             }
+
+            // As tabelas são criadas apenas no banco local do professor.
+            if (local)
+            {
+                await Setup();
+            }
+
+            conectado = true;
+            return "Conectado ao Banco!";
+        }
+        finally
+        {
+            _conexaoLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Encerra o servidor portátil caso ele tenha sido iniciado por este app.
+    /// Um PostgreSQL externo (Docker, serviço do sistema ou máquina remota)
+    /// não é afetado.
+    /// </summary>
+    public static void StopLocalServer()
+    {
+        if (!_servidorIniciadoPeloApp || string.IsNullOrEmpty(_pgCtl) || string.IsNullOrEmpty(_dataDir))
+        {
+            return;
         }
 
-        return "Conectado ao Banco!";
+        try
+        {
+            ExecutarFerramenta(_pgCtl, $"-D \"{_dataDir}\" -m fast -w stop")
+                .GetAwaiter()
+                .GetResult();
+        }
+        catch
+        {
+            // Se o processo já tiver encerrado, não há nada a fazer.
+        }
+
+        _servidorIniciadoPeloApp = false;
+
+        try
+        {
+            dataSource?.Dispose();
+        }
+        catch
+        {
+            // Ignora erros ao liberar um datasource já descartado.
+        }
+
+        dataSource = null!;
+        conectado = false;
     }
-    //Testa se conexão Existe
-    public  static void testConnection()
+
+    public static void testConnection()
     {
         if (!conectado || dataSource == null)
         {
             throw new DatabaseNotConnectedException();
-        }   
+        }
     }
 
-    
+    private static int ResolverPorta()
+    {
+        string? valor = Environment.GetEnvironmentVariable("HACKOON_PG_PORT");
+
+        if (int.TryParse(valor, out int porta) && porta > 0 && porta <= 65535)
+        {
+            return porta;
+        }
+
+        return PortaPadrao;
+    }
+
+    /// <summary>
+    /// Se a porta configurada já estiver em uso (Docker, serviço etc.),
+    /// avança para a primeira porta livre (5433, 5434...). Com
+    /// HACKOON_PG_PORT definido, a porta escolhida pelo usuário é respeitada.
+    /// </summary>
+    private static void ResolverPortaLivre()
+    {
+        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("HACKOON_PG_PORT")))
+        {
+            return;
+        }
+
+        int limite = _porta + 100;
+
+        for (int candidato = _porta; candidato < limite; candidato++)
+        {
+            if (!PortaOcupada(candidato))
+            {
+                if (candidato != _porta)
+                {
+                    Console.WriteLine(
+                        $"[DB] Porta {_porta} já está em uso (ex.: Docker). " +
+                        $"Usando a porta {candidato} para o PostgreSQL embutido.");
+                    _porta = candidato;
+                }
+
+                return;
+            }
+        }
+
+        throw new Exception(
+            $"Nenhuma porta livre encontrada entre {_porta} e {limite - 1}. " +
+            "Encerre o processo que ocupa a 5432 (ex.: container Docker) ou " +
+            "defina HACKOON_PG_PORT com uma porta livre.");
+    }
+
+    private static bool PortaOcupada(int porta)
+    {
+        try
+        {
+            using var listener = new System.Net.Sockets.TcpListener(
+                System.Net.IPAddress.Loopback, porta);
+            listener.Start();
+            listener.Stop();
+            return false;
+        }
+        catch (System.Net.Sockets.SocketException)
+        {
+            return true;
+        }
+    }
+
+    private static bool EhLocal(string ipServidor)
+    {
+        return ipServidor == "127.0.0.1" || ipServidor == "localhost" || ipServidor == "::1";
+    }
+
+    private static async Task IniciarServidorLocalAsync()
+    {
+        if (_servidorIniciadoPeloApp)
+        {
+            return;
+        }
+
+        string raiz = DescobrirRaizPostgres();
+        string bin = Path.Combine(raiz, "bin");
+
+        string pgCtl = Path.Combine(bin, OperatingSystem.IsWindows() ? "pg_ctl.exe" : "pg_ctl");
+        string initdb = Path.Combine(bin, OperatingSystem.IsWindows() ? "initdb.exe" : "initdb");
+
+        if (!File.Exists(pgCtl) || !File.Exists(initdb))
+        {
+            throw new Exception(
+                $"Binários do PostgreSQL portátil não encontrados em '{raiz}' para {RuntimeInformation.OSDescription}. " +
+                "No Windows espera-se pgsql/windows/bin e no Linux pgsql/linux/bin.");
+        }
+
+        _pgCtl = pgCtl;
+        _dataDir = Path.Combine(raiz, "data");
+        _logPath = Path.Combine(raiz, "postgres.log");
+
+        // Servidor de uma execução anterior ainda ativo (app fechou sem parar
+        // o banco, por exemplo): usa a porta que está gravada no
+        // postgresql.conf dele, sem reescrever nada.
+        var status = await ExecutarFerramenta(pgCtl, $"-D \"{_dataDir}\" status");
+
+        if (status.Codigo == 0)
+        {
+            int portaGravada = LerPortaDoConfig(_dataDir);
+
+            if (portaGravada > 0 && portaGravada != _porta)
+            {
+                Console.WriteLine(
+                    $"[DB] PostgreSQL embutido já estava rodando na porta {portaGravada}");
+                _porta = portaGravada;
+            }
+
+            // Adota o servidor órfão: ao fechar o jogo, ele também é encerrado.
+            _servidorIniciadoPeloApp = true;
+            Console.WriteLine("[DB] PostgreSQL embutido já estava rodando");
+            return;
+        }
+
+        // Se a porta desejada já estiver ocupada (ex.: um Docker de teste na
+        // 5432), o servidor embutido sobe na primeira porta livre seguinte.
+        ResolverPortaLivre();
+
+        if (!File.Exists(Path.Combine(_dataDir, "PG_VERSION")))
+        {
+            if (Directory.Exists(_dataDir) && Directory.EnumerateFileSystemEntries(_dataDir).Any())
+            {
+                throw new Exception(
+                    $"A pasta de dados '{_dataDir}' existe, mas não é um banco PostgreSQL válido. " +
+                    "Mova ou apague essa pasta para que o app possa inicializar o banco portátil.");
+            }
+
+            Directory.CreateDirectory(_dataDir);
+
+            var init = await ExecutarFerramenta(
+                initdb,
+                $"-D \"{_dataDir}\" -U postgres --encoding=UTF8 --locale=C -A trust");
+
+            if (init.Codigo != 0)
+            {
+                throw new Exception(
+                    $"Falha ao inicializar o PostgreSQL portátil (código {init.Codigo}).\n{init.Saida}");
+            }
+
+            Console.WriteLine($"[DB] PostgreSQL portátil inicializado em {_dataDir}");
+        }
+
+        ConfigurarArquivos(_dataDir);
+
+        var inicio = await ExecutarFerramenta(
+            pgCtl,
+            $"-D \"{_dataDir}\" -l \"{_logPath}\" -o \"-p {_porta}\" -w start");
+
+        if (inicio.Codigo != 0)
+        {
+            string log = LerFinalDoLog(_logPath);
+            throw new Exception(
+                $"Não foi possível iniciar o PostgreSQL portátil (código {inicio.Codigo}).\n" +
+                $"{inicio.Saida}\n{log}");
+        }
+
+        _servidorIniciadoPeloApp = true;
+        Console.WriteLine($"[DB] PostgreSQL portátil iniciado na porta {_porta}");
+    }
+
+    private static string DescobrirRaizPostgres()
+    {
+        string baseDir = AppContext.BaseDirectory;
+
+        if (OperatingSystem.IsWindows())
+        {
+            return Path.Combine(baseDir, "pgsql", "windows");
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            return Path.Combine(baseDir, "pgsql", "linux");
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            return Path.Combine(baseDir, "pgsql", "macos");
+        }
+
+        return Path.Combine(baseDir, "pgsql");
+    }
+
+    private static void ConfigurarArquivos(string dataDir)
+    {
+        // listen_addresses/port ficam em um bloco que pode ser reescrito sem
+        // duplicar linhas a cada inicialização.
+        string configFile = Path.Combine(dataDir, "postgresql.conf");
+        string configuracao = File.Exists(configFile) ? File.ReadAllText(configFile) : string.Empty;
+
+        int inicio = configuracao.IndexOf(MarcadorInicio, StringComparison.Ordinal);
+
+        if (inicio >= 0)
+        {
+            int fim = configuracao.IndexOf(MarcadorFim, inicio, StringComparison.Ordinal);
+
+            if (fim >= 0)
+            {
+                configuracao = configuracao.Remove(inicio, fim - inicio + MarcadorFim.Length);
+            }
+        }
+
+        configuracao = configuracao.TrimEnd() + Environment.NewLine +
+                       MarcadorInicio + Environment.NewLine +
+                       "listen_addresses = '*'" + Environment.NewLine +
+                       $"port = {_porta}" + Environment.NewLine +
+                       MarcadorFim + Environment.NewLine;
+
+        File.WriteAllText(configFile, configuracao);
+
+        string hbaFile = Path.Combine(dataDir, "pg_hba.conf");
+        string hba = File.Exists(hbaFile) ? File.ReadAllText(hbaFile) : string.Empty;
+
+        if (!hba.Contains("0.0.0.0/0", StringComparison.Ordinal))
+        {
+            hba = hba.TrimEnd() + Environment.NewLine +
+                  "# Rede local (Hackoon Game Hub)" + Environment.NewLine +
+                  "host all all 0.0.0.0/0 trust" + Environment.NewLine +
+                  "host all all ::/0 trust" + Environment.NewLine;
+
+            File.WriteAllText(hbaFile, hba);
+        }
+    }
+
+    private static async Task<(int Codigo, string Saida)> ExecutarFerramenta(
+        string executavel,
+        string argumentos)
+    {
+        var inicio = new ProcessStartInfo
+        {
+            FileName = executavel,
+            Arguments = argumentos,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            WorkingDirectory = Path.GetDirectoryName(executavel) ?? AppContext.BaseDirectory
+        };
+
+        if (!OperatingSystem.IsWindows())
+        {
+            string lib = Path.GetFullPath(Path.Combine(inicio.WorkingDirectory, "..", "lib"));
+            string atual = Environment.GetEnvironmentVariable("LD_LIBRARY_PATH") ?? string.Empty;
+
+            inicio.Environment["LD_LIBRARY_PATH"] =
+                string.IsNullOrEmpty(atual) ? lib : lib + ":" + atual;
+            inicio.Environment["LC_ALL"] = "C";
+        }
+
+        using var processo = Process.Start(inicio);
+
+        if (processo == null)
+        {
+            return (-1, "Não foi possível iniciar o processo.");
+        }
+
+        string saida = await processo.StandardOutput.ReadToEndAsync().ConfigureAwait(false);
+        string erro = await processo.StandardError.ReadToEndAsync().ConfigureAwait(false);
+
+        await processo.WaitForExitAsync().ConfigureAwait(false);
+
+        return (processo.ExitCode, (saida + Environment.NewLine + erro).Trim());
+    }
+
+    /// <summary>
+    /// Lê a porta do bloco marcado no postgresql.conf de um servidor que já
+    /// estava rodando (execução anterior do app).
+    /// </summary>
+    private static int LerPortaDoConfig(string dataDir)
+    {
+        try
+        {
+            string configFile = Path.Combine(dataDir, "postgresql.conf");
+
+            if (!File.Exists(configFile))
+            {
+                return 0;
+            }
+
+            string configuracao = File.ReadAllText(configFile);
+
+            int inicio = configuracao.IndexOf(MarcadorInicio, StringComparison.Ordinal);
+            int fim = configuracao.IndexOf(MarcadorFim, StringComparison.Ordinal);
+
+            if (inicio < 0 || fim < 0 || fim <= inicio)
+            {
+                return 0;
+            }
+
+            string bloco = configuracao[(inicio + MarcadorInicio.Length)..fim];
+
+            foreach (string linha in bloco.Split('\n'))
+            {
+                string limpa = linha.Trim();
+
+                if (limpa.StartsWith("port =", StringComparison.Ordinal) &&
+                    int.TryParse(limpa["port =".Length..].Trim(), out int porta))
+                {
+                    return porta;
+                }
+            }
+        }
+        catch
+        {
+            // Se não conseguir ler, o comportamento antigo é mantido.
+        }
+
+        return 0;
+    }
+
+    private static string LerFinalDoLog(string caminho)
+    {
+        try
+        {
+            if (!File.Exists(caminho))
+            {
+                return string.Empty;
+            }
+
+            string[] linhas = File.ReadAllLines(caminho);
+            int inicio = Math.Max(0, linhas.Length - 15);
+            return "Últimas linhas do log:" + Environment.NewLine +
+                   string.Join(Environment.NewLine, linhas[inicio..]);
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
     private static async Task Setup()
     {
         await using var cmd = dataSource.CreateCommand(@"
@@ -94,111 +532,21 @@ public class DB
             password varchar(255),
             created_at timestamp
         );
+
+        -- Tabela de Jogos (conexões internas criadas pelos alunos dentro do lobby)
+        CREATE TABLE IF NOT EXISTS jogos (
+            id SERIAL primary key,
+            name varchar(255) not null,
+            id_sala INTEGER references salas(id) on delete set null,
+            id_aluno INTEGER references alunos(id) on delete set null,
+            creator varchar(255),
+            host_ip varchar(255),
+            port INTEGER DEFAULT 7778,
+            status varchar(32) DEFAULT 'ABERTO',
+            created_at timestamp
+        );
     ");
 
         await cmd.ExecuteNonQueryAsync();
-    }
-    private static void StartDatabase()
-    {
-        //Verifica Se ja tem Processo com Este Nome
-        if (Process.GetProcessesByName("postgres").Length > 0)
-        {
-            return;
-        }
-
-        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        // No seu caso, a pasta de binários do Windows (winPG)
-        string pgsqlPath = Path.Combine(baseDir, "pgsql"); 
-        string pgctlPath = Path.Combine(pgsqlPath, "bin", "pg_ctl.exe");
-        string binPath = Path.Combine(pgsqlPath, "bin");
-        string dataPath = Path.Combine(pgsqlPath, "data");
-        string logPath = Path.Combine(pgsqlPath, "logfile");
-        string sharePath = Path.Combine(pgsqlPath, "share");
-        
-        if (!File.Exists(Path.Combine(dataPath, "PG_VERSION")))
-        {
-            InitializeDatabase(binPath, dataPath);
-            ConfigurarPostgresParaRedeLocal(dataPath);
-            
-        }
-        
-        string[] folders = { "pg_tblspc", "pg_replslot", "pg_snapshots", "pg_commit_ts" };
-        foreach (var folder in folders)
-        {
-            string fullPath = Path.Combine(dataPath, folder);
-            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
-        }
-
-        ProcessStartInfo psi = new ProcessStartInfo
-        {
-            FileName = pgctlPath,
-            Arguments = $"-D \"{dataPath}\" -l \"{logPath}\" start",
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = Path.Combine(pgsqlPath, "bin")
-        };
-
-        try 
-        {
-            Process.Start(psi);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Erro ao iniciar Banco De dados: {ex.Message}");
-        }
-    }
-    private static void InitializeDatabase(string binPath, string dataPath)
-    {
-        ProcessStartInfo initPsi = new ProcessStartInfo
-        {
-            FileName = Path.Combine(binPath, "initdb.exe"),
-            Arguments = $"-D \"{dataPath}\" -U postgres --encoding=UTF8 --locale=Portuguese_Brazil -A trust",
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = binPath
-        };
-
-        using (Process proc = Process.Start(initPsi))
-        {
-            proc.WaitForExit();
-            if (proc.ExitCode != 0)
-            {
-                throw new Exception($"InitDB falhou com código {proc.ExitCode}");
-            }
-        }
-    }
-    private static void ConfigurarPostgresParaRedeLocal(string dataPath)
-    {
-        // 1. Libera para escutar todas as placas de rede da máquina (substitui localhost por *)
-        string configFile = Path.Combine(dataPath, "postgresql.conf");
-        if (File.Exists(configFile))
-        {
-            string conteudo = File.ReadAllText(configFile);
-            conteudo = conteudo.Replace("#listen_addresses = 'localhost'", "listen_addresses = '*'");
-            conteudo = conteudo.Replace("listen_addresses = 'localhost'", "listen_addresses = '*'");
-            File.WriteAllText(configFile, conteudo);
-        }
-
-        // 2. Permite que qualquer IP IPv4 se autentique sem travar (regrade confiança para LAN de escola)
-        string hbaFile = Path.Combine(dataPath, "pg_hba.conf");
-        if (File.Exists(hbaFile))
-        {
-            string regrasDeAcesso = "\nhost    all             all             0.0.0.0/0               trust\n";
-            File.AppendAllText(hbaFile, regrasDeAcesso);
-        }
-    }
-    private static void isLocal(string ipServidor, Action task)
-    {
-        if (ipServidor == "127.0.0.1" || ipServidor == "localhost")
-        {
-            task.Invoke();
-        }
-    }
-    private static async Task isLocalAsync(string ipServidor, Func<Task> funcaoAssincrona)
-    {
-        if (ipServidor == "127.0.0.1" || ipServidor == "localhost")
-        {
-            await funcaoAssincrona.Invoke();
-        }
     }
 }

@@ -1,8 +1,13 @@
-[gd_scene format=3 uid="uid://2xapy6q32s6t"]
+[gd_scene load_steps=33 format=3 uid="uid://2xapy6q32s6t"]
 
 [ext_resource type="Texture2D" uid="uid://b2kwhg1u6h0p3" path="res://Assets/Personagem/baseTeste.png" id="1_mwuoi"]
 [ext_resource type="Texture2D" uid="uid://iumc6rub4cvf" path="res://Assets/Personagem/baseModelo.png" id="2_hnpv4"]
-[ext_resource type="Script" uid="uid://c4ifsu3o1wjes" path="res://Scripts/Personagem/Personagem.cs" id="2_rsnxq"]
+[ext_resource type="Script" uid="uid://c4ifsu3o1wjes" path="res://Scripts/Personagem/Personagem.cs" id="3_script"]
+[ext_resource type="Shader" path="res://Assets/Shaders/personagem_tint.gdshader" id="4_tint"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tint"]
+shader = ExtResource("4_tint")
+shader_parameter/tint_color = Color(1, 1, 1, 1)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hnpv4"]
 atlas = ExtResource("1_mwuoi")
@@ -265,14 +270,49 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath(".:SyncAnimation")
 properties/2/spawn = true
 properties/2/replication_mode = 1
+properties/3/path = NodePath(".:PlayerName")
+properties/3/spawn = true
+properties/3/replication_mode = 2
+properties/4/path = NodePath(".:SyncColor")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+properties/5/path = NodePath(".:PlayerNick")
+properties/5/spawn = true
+properties/5/replication_mode = 1
 
-[node name="Personagem" type="AnimatedSprite2D" unique_id=1999243304]
-position = Vector2(15, 0)
+[node name="Personagem" type="Node2D"]
+z_index = 10
+script = ExtResource("3_script")
+SyncAnimation = "idleDown"
+
+[node name="Shadow" type="Polygon2D" parent="."]
+position = Vector2(0, 30)
+color = Color(0, 0, 0, 0.21960784)
+polygon = PackedVector2Array(22, 0, 20.92, 2.16, 17.8, 4.11, 12.93, 5.66, 6.8, 6.66, 0, 7, -6.8, 6.66, -12.93, 5.66, -17.8, 4.11, -20.92, 2.16, -22, 0, -20.92, -2.16, -17.8, -4.11, -12.93, -5.66, -6.8, -6.66, -0, -7, 6.8, -6.66, 12.93, -5.66, 17.8, -4.11, 20.92, -2.16)
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+material = SubResource("ShaderMaterial_tint")
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_vobk6")
-animation = &"up"
-frame_progress = 0.4818482
-script = ExtResource("2_rsnxq")
+animation = &"idleDown"
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1605888411]
+[node name="NameLabel" type="Label" parent="."]
+offset_left = -80.0
+offset_top = -62.0
+offset_right = 80.0
+offset_bottom = -38.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 13
+text = "Jogador"
+horizontal_alignment = 1
+
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = false
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+zoom = Vector2(2, 2)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_rsnxq")

@@ -68,7 +68,7 @@ public partial class FormsProfessor : Control
 			carregamento.Visible = false;
 			
 			Professor professor = new Professor(txtNome.GetText(), txtEmail.GetText(), txtSenha.GetText());
-			ProfessorService.RegisterProfessor(professor);
+			await ProfessorService.RegisterProfessor(professor);
 			var session = GetNode<SessionManager>("/root/SessionManager");
 			session.usuario = professor;
 			
