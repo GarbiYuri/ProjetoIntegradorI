@@ -82,3 +82,5 @@ layout_mode = 2
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/alunosHBoxContainer/nomeVBoxContainer" unique_id=272468503]
 layout_mode = 2
 text = "NAME"
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=100798022]

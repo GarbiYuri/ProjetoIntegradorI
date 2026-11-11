@@ -10,12 +10,14 @@ public partial class FormsAlunos : Control
 	private VBoxContainer _sobrenomeContainer;
 	private VBoxContainer _buttonContainer;
 	
+	private Button _buttonCriar;
+	
 	public override async void _Ready()
 	{
-		_nomeContainer = GetNode<VBoxContainer>("PanelContainer/alunosHBoxContainer/nomeVBoxContainer");
-		_sobrenomeContainer = GetNode<VBoxContainer>("PanelContainer/alunosHBoxContainer/sobrenomeVBoxContainer");
-		_buttonContainer = GetNode<VBoxContainer>("PanelContainer/alunosHBoxContainer/buttonContainer");
-		
+		_nomeContainer = GetNode<VBoxContainer>("PanelContainer/VBoxContainer/alunosHBoxContainer/nomeVBoxContainer");
+		_sobrenomeContainer = GetNode<VBoxContainer>("PanelContainer/VBoxContainer/alunosHBoxContainer/sobrenomeVBoxContainer");
+		_buttonContainer = GetNode<VBoxContainer>("PanelContainer/VBoxContainer/alunosHBoxContainer/buttonContainer");
+		_buttonCriar = GetNode<Button>("PanelContainer/VBoxContainer/HBoxContainer/criarButton");
 		List<Aluno> alunos = await AlunoService.showAll();
 
 		foreach (Aluno aluno in alunos)
@@ -40,6 +42,18 @@ public partial class FormsAlunos : Control
 				AlunoService.SendMyPersona(idAluno);
 			};
 
+		}
+
+		_buttonCriar.Pressed += OnButtonCriarPressed;
+	}
+
+	private void OnButtonCriarPressed()
+	{
+		Error res = GetTree().ChangeSceneToFile("res://Scenes/Forms/AlunoForms.tscn");
+		
+		if (res != Error.Ok)
+		{
+			GD.Print("Erro: " + res);
 		}
 	}
 

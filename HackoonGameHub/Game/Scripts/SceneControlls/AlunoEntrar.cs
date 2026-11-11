@@ -2,7 +2,9 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using Game.Scripts;
 using Models;
+using Repository.Postgress;
 using Service;
 
 public partial class AlunoEntrar : Control
@@ -12,11 +14,16 @@ public partial class AlunoEntrar : Control
 	private VBoxContainer _middleVBoxContainer;
 	private VBoxContainer _buttonVBoxContainer;
 	
+	private SessionManager session;
+	
 	public override async void _Ready()
 	{
 		_ipVBoxContainer = GetNode<VBoxContainer>("PanelContainer/VBoxContainer/professorHBoxContainer/ipVBoxContainer");
 		_middleVBoxContainer = GetNode<VBoxContainer>("PanelContainer/VBoxContainer/professorHBoxContainer/middleVBoxContainer");
 		_buttonVBoxContainer = GetNode<VBoxContainer>("PanelContainer/VBoxContainer/professorHBoxContainer/buttonVBoxContainer");
+		
+		session = GetNode<SessionManager>("/root/SessionManager");
+		
 		NetworkPacket res = await AlunoService.enterGame();
 		
 		string statusDoJogo = "Desconhecido";
@@ -67,13 +74,16 @@ public partial class AlunoEntrar : Control
 		_ipVBoxContainer.AddChild(ip);
 		_middleVBoxContainer.AddChild(middle);
 		_buttonVBoxContainer.AddChild(button);
-				
+		_ips.Add(res.senderIP);
 	}
 
 	public void OnButtonPressed()
 	{
+		Usuario prof = new Professor();
+		prof.ip = _ips[0];
+		session.usuariosNaRede.Add(prof);
 		Error res = GetTree().ChangeSceneToFile("res://Scenes/Forms/AlunoForms.tscn");
-	
+		
 		if (res != Error.Ok)
 		{
 			GD.Print("Erro: " + res);

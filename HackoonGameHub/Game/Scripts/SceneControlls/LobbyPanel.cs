@@ -18,6 +18,7 @@ public partial class LobbyPanel : Control
 	
 	private SessionManager session;
 	
+	
 	public override async void _Ready()
 	{
 		_nomeSalaLabel = GetNode<Label>("PanelContainer/VBoxContainer/HBoxContainer/nomeSalaLabel");
@@ -62,7 +63,7 @@ public partial class LobbyPanel : Control
 					}
 				}
 			}
-		}
+		}	
 		catch (Exception e)
 		{
 			GD.PrintErr("Erro ao decodificar as camadas de JSON: " + e.Message);
@@ -82,7 +83,10 @@ public partial class LobbyPanel : Control
 				username.Text = string.IsNullOrEmpty(a.username) ? "" :  a.username;
 			}
 		}
+
 	}
+	
+	
 
 	private struct Dados
 	{
