@@ -45,9 +45,9 @@ O que faltava para o ciclo fechar:
 
 ### 2.1 Lobby jogável
 
-Prévia do lobby em modo solo:
+Prévia do lobby em modo solo (visão de mapa inteiro):
 
-![Lobby em modo solo](Imagens/LobbySolo.png)
+![Lobby em modo solo](Imagens/LobbyMapaInteiro.png)
 
 Tela de entrada (solo, hospedar ou entrar por IP):
 
@@ -62,9 +62,13 @@ Cena: `Game/Scenes/Personagem/LobbyPrincipal.tscn`
   - **JOGAR SOZINHO** — modo offline para testar a arte e a movimentação.
   - **HOSPEDAR SALA** — abre um servidor ENet na porta `7777`.
   - **ENTRAR EM SALA** — conecta no IP informado (IP do professor).
-- HUD com nome da sala, status da conexão, contador de jogadores e botão de
-  sair.
-- Câmera que segue o personagem local, com zoom `2x` e suavização.
+- HUD compacto com nome da sala, status da conexão, contador de jogadores, o
+  botão **🎮 JOGOS** (catálogo) e botão de sair. No modo solo o catálogo também
+  fica disponível.
+- **Câmera única de mapa inteiro** (`HostCamera`), sem o zoom do personagem:
+  o aluno vê a sala inteira e o personagem não liga a câmera própria
+  (`Personagem.UserCamera = false`). O enquadramento se ajusta ao tamanho da
+  janela (`AjustarCameraMapa`).
 - Nome do jogador flutuando sobre o personagem.
 - Sincronização de posição, direção, animação e nome pelo
   `MultiplayerSynchronizer`.
@@ -140,11 +144,22 @@ Personagem (Node2D)
   (HUD/dashboard/overlay). Textos “placeholder” na tela (USERNAME, NAME, BOTÃO
   etc.) foram removidos.
 
-### 2.5.2 Aluno não cria lobby: só conexão interna para o jogo
+### 2.5.2 Portas de jogo: o aluno abre a partida, não a sala
 
-Regra do projeto: **quem cria sala (lobby) é o professor**. O aluno entra na
-sala que o professor abriu e, dentro do lobby, pode criar o **jogo online** —
-que é uma **conexão interna**, não uma sala nova.
+Regra do projeto: **quem cria sala (lobby) é o professor**. Dentro da sala,
+**qualquer jogador** (inclusive convidado sem conta) pode abrir uma **porta de
+jogo** para um jogo do catálogo.
+
+**Catálogo e entrada sem conta:**
+
+- A tela de conta (`AlunoConta`) ganhou **JOGAR SEM CONTA**: o convidado não
+  cria registro no banco, não anuncia persona e entra direto no lobby usando o
+  IP da sessão descoberta pelo professor. Para abrir uma porta ele usa o mesmo
+  catálogo dos colegas.
+- O catálogo fica em `Game/Scripts/Games/GameRegistry.cs`. Cada jogo é um
+  `GameInfo` (id, nome, descrição, cena, categoria, jogadores, cor, emblema).
+  Os cartões do catálogo do aluno e do painel do professor são gerados a partir
+  dele.
 
 **Lista de alunos da sala (visível para os alunos):**
 
@@ -163,20 +178,24 @@ que é uma **conexão interna**, não uma sala nova.
   `AlunoDB.VincularSala`), então a sala também guarda quem está vinculado a
   ela.
 
-**Conexão interna (jogo online do aluno):**
+**Porta de jogo (partida):**
 
-- Botão **CRIAR** no painel **JOGOS ONLINE** (visível só para os alunos):
-  o aluno sobe um **segundo servidor ENet** (porta `7778`+) numa **API de
-  multiplayer separada**, aplicada apenas ao nó `World/Jogos` — a conexão do
-  lobby continua intacta.
-- O servidor do lobby recebe o pedido por RPC (`RequisitarJogo`), registra o
-  jogo (tabela `jogos`, criada automaticamente) e **divulga a lista** para
-  todos; quem entra depois recebe a lista ao se conectar.
-- Os colegas veem o jogo e entram com **ENTRAR** (conexão separada, sem
-  sair do lobby). O dono pode **FECHAR**; o professor pode **ENCERRAR** pelo
-  painel dele.
-- Atalhos de desenvolvimento: `--lobby-criar-jogo[=SEGUNDOS]` e
-  `--lobby-entrar-jogo[=SEGUNDOS]`.
+- **ABRIR PORTA** no catálogo sobe um **servidor ENet próprio da partida**
+  (porta `7778`+) em uma **API de multiplayer separada**, aplicada apenas à
+  raiz do overlay (`GameSessionRoot`) — a conexão do lobby continua intacta.
+- O jogo abre em **tela cheia sobre o lobby** (`GameOverlay`), com barra
+  superior (jogo, porta, dono) e saída pelo botão **FECHAR JOGO** ou `Esc`.
+  Enquanto o jogo está aberto o personagem fica travado (`InputLocked`).
+- O servidor do lobby recebe o pedido por RPC (`RequisitarJogo`), registra a
+  porta (tabela `jogos`) e **divulga a lista** para todos; quem entra depois
+  recebe a lista ao se conectar.
+- Os colegas veem a porta na lista e entram com **ENTRAR** (conexão separada,
+  sem sair do lobby). O dono pode **FECHAR**; o professor pode **ENCERRAR**
+  pelo painel dele.
+- O dono da porta publica no painel do professor a quantidade de jogadores e o
+  **placar ao vivo**; ao final, o resumo da partida aparece no cartão da porta.
+- Atalhos de desenvolvimento: `--lobby-jogos[=SEGUNDOS]`,
+  `--lobby-criar-jogo[=SEGUNDOS]` e `--lobby-entrar-jogo[=SEGUNDOS]`.
 
 ### 2.5.3 Lobby sempre aberto + botão INICIAR JOGO
 
@@ -193,8 +212,8 @@ conectando e reconectando sem nunca ver o lobby.
   (`ProfessorService.SendMessage` em `StartHost`), então o aluno sempre
   encontra a sala e entra direto, a qualquer momento.
 - O botão **INICIAR JOGO** (no painel do professor) fecha o painel e leva
-  **todos** (professor pela `HostCamera` e alunos) para o lobby, que é onde os
-  minigames vão ficar — o contêiner reservado é o nó **`World/Jogos`**.
+  **todos** (professor pela `HostCamera` e alunos) para o HUD do lobby, de onde
+  os jogos são abertos pelo catálogo **🎮 JOGOS**.
   - A mudança de estado é enviada por **RPC** (`AplicarModoJogo`, confiável) para
     todos os conectados.
   - Aluno que entra **depois** do jogo começado já entra no modo jogo
@@ -260,6 +279,38 @@ Godot --path Game --rendering-driver opengl3 \
   res://Scenes/Forms/AlunoConta.tscn /tmp/opencode/conta.png
 ```
 
+### 2.9 Ciclo de jogos do Hub (catálogo + portas + overlay)
+
+Visão de mapa inteiro, HUD compacto e botão do catálogo:
+
+![Lobby com mapa inteiro e HUD compacto](Imagens/LobbyMapaInteiro.png)
+
+Catálogo aberto no HUD do aluno:
+
+![Catálogo de jogos no HUD](Imagens/LobbyCatalogo.png)
+
+Painel do professor com uma porta aberta, jogadores e placar ao vivo:
+
+![Painel do professor com porta aberta](Imagens/PainelProfessorJogos.png)
+
+Partida do Regras de Convivência com dois jogadores na mesma porta:
+
+![Regras de Convivência com dois jogadores](Imagens/JogoRegras.png)
+
+Peças do ciclo:
+
+| Peça | Arquivo | Papel |
+| --- | --- | --- |
+| Catálogo | `Game/Scripts/Games/GameRegistry.cs` + `GameInfo.cs` | Lista central de jogos; adicionar um jogo é uma linha |
+| Contrato | `Game/Scripts/Games/MinigameBase.cs` + `GameContexto.cs` | O jogo recebe porta, host, jogador, sala e callbacks de saída/status |
+| Overlay | `Game/Scripts/Games/GameOverlay.cs` + `Game/Scenes/Games/GameOverlay.tscn` | Hospeda o minigame em tela cheia e expõe `GameSessionRoot` |
+| Porta | `LobbyPrincipal.AbrirJogoDoCatalogo`/`EntrarNoJogo` | Sobe o ENet da partida (`7778`+) e isola a API de multiplayer |
+| Professor | Painel `Dashboard` | Vê alunos, portas, jogadores, placar e pode **ENCERRAR** |
+| Jogo | `Game/Games/RegrasDeConvivencia/` | Porte do jogo original com BOA/RUIM, imagens, feedback e placar |
+
+O contrato completo e o passo a passo para acrescentar jogos estão em
+[`Games.md`](Games.md).
+
 ## 3. Como testar
 
 ### 3.1 Lobby sozinho (sem banco e sem rede)
@@ -295,12 +346,15 @@ sincronizados. Quando o professor encerra a sessão, o cliente recebe
 1. Execute o jogo pela cena principal. O **PostgreSQL embutido** sobe
    automaticamente na máquina do professor (na porta `5432`, ou na primeira
    porta livre se a 5432 estiver ocupada).
-2. Professor: cadastre-se/entre → crie uma sala → entre na sala → tela de
-   espera (que mostra os alunos entrando em tempo real) → **ABRIR LOBBY**.
+2. Professor: cadastre-se/entre → crie uma sala → entre na sala → **painel do
+   professor** já aberto, com a sessão anunciada para os alunos.
 3. Aluno (mesmo PC ou outro PC da mesma rede): entre no jogo → a tela mostra a
    **sessão aberta pelo professor** (nome da sala, professor, IP e porta do
-   banco vindos do broadcast) → escolha o aluno → o lobby conecta
-   automaticamente no IP do professor.
+   banco vindos do broadcast) → escolha a conta (ou **JOGAR SEM CONTA**) → o
+   lobby conecta automaticamente no IP do professor.
+4. No lobby, abra **🎮 JOGOS**, escolha um jogo e **ABRIR PORTA**; os colegas
+   entram pela lista de portas. O professor acompanha jogadores e placar no
+   painel.
 
 > Portas usadas: `11000` e `11001` para descoberta UDP (professor/aluno) e
 > `7777` para o lobby ENet, além da porta do PostgreSQL (padrão `5432`, ou a
@@ -369,14 +423,19 @@ Correções encontradas durante essa validação:
 - O cenário do lobby é um **placeholder** de formas geométricas; a arte final
   ainda será produzida.
 - O personagem é um **placeholder**: troque os sprites no nó `Sprite`.
+- Algumas imagens do Regras de Convivência que não vieram no pacote original
+  foram geradas como **placeholders** de traço simples; podem ser substituídas
+  em `Game/Games/RegrasDeConvivencia/imagens/` sem mexer no código.
 - Não há colisão física com mesas/paredes; o limite atual é apenas a área do
   piso (`MovementBounds`). Para evoluir, trocar o `Node2D` por
   `CharacterBody2D` e adicionar `CollisionShape2D`/`StaticBody2D`.
-- O lobby não tem lista visual de jogadores no HUD do aluno; a **dashboard do
-  professor** cobre isso no lado host (lista de alunos conectados com nomes).
+- O HUD do aluno mostra o **contador** de jogadores; a lista nominal completa
+  fica no painel do professor e na tela de entrada da sala.
 - Não há tela de criação de personagem; o botão existente foi desabilitado com
   o texto “EM BREVE”.
 - O host ainda não escolhe o mapa/fase; o lobby é uma sala única.
+- Cada jogador pode abrir **uma porta por vez** (abrir outra substitui a
+  anterior) e as portas vivem enquanto o dono estiver no lobby/jogo.
 - A exportação para Windows/Linux ainda precisa ser validada na máquina de
   apresentação. O PostgreSQL embutido já foi validado no Linux; a pasta
   `pgsql/windows` (binários `.exe` que já existem no repositório) segue o mesmo
@@ -389,8 +448,15 @@ Correções encontradas durante essa validação:
 
 | Arquivo | Mudança |
 | --- | --- |
-| `Game/Scenes/Personagem/LobbyPrincipal.tscn` | Cenário, HUD, overlay de entrada, **dashboard do professor**, HostCamera, **botão INICIAR JOGO**, botão PAINEL e contêiner `World/Jogos` |
-| `Game/Scripts/Personagem/LobbyPrincipal.cs` | Modos solo/host/cliente, spawn (só clientes ganham personagem), dashboard, **broadcast sempre ligado no host**, **RPC do INICIAR JOGO**, encerramento de sessão |
+| `Game/Scenes/Personagem/LobbyPrincipal.tscn` | Cenário, HUD compacto, catálogo, painel do professor com portas, `GameLayer/GameOverlay` e `HostCamera` de mapa inteiro |
+| `Game/Scripts/Personagem/LobbyPrincipal.cs` | Modos solo/host/cliente, spawn, dashboard, **catálogo, portas de jogo, overlay, câmera de mapa inteiro** e publicação de jogadores/placar |
+| `Game/Scripts/Games/GameRegistry.cs` | **Novo** catálogo central: adicionar jogo = registrar um `GameInfo` |
+| `Game/Scripts/Games/GameInfo.cs` | **Novo** metadados de um jogo (id, nome, cena, categoria, jogadores, cor, emblema) |
+| `Game/Scripts/Games/GameContexto.cs` | **Novo** contexto entregue ao jogo (porta, host, jogador, sala, sair, avisar) |
+| `Game/Scripts/Games/MinigameBase.cs` | **Novo** contrato base dos minigames (status, placar, fim) |
+| `Game/Scripts/Games/GameOverlay.cs` + `Game/Scenes/Games/GameOverlay.tscn` | **Novos** overlay em tela cheia e `GameSessionRoot` (API de multiplayer da partida) |
+| `Game/Games/RegrasDeConvivencia/` | **Novo** porte do jogo original (10 atitudes, 5 por partida, BOA/RUIM, imagens, placar e RPCs da porta) |
+| `Game/Scenes/Forms/AlunoConta.tscn` + `Game/Scripts/SceneControlls/AlunoConta.cs` | **Novo botão JOGAR SEM CONTA** (convidado sem banco) |
 | `Game/Scripts/SceneControlls/FormsSalas.cs` | Entra direto no lobby (sessão já aberta e anunciada para os alunos) |
 | `Game/Scenes/Personagem/Personagem.tscn` | Separação em Sprite/Shadow/Nome/Câmera |
 | `Game/Scripts/Personagem/Personagem.cs` | Movimento WASD/setas, animação, câmera e nome |

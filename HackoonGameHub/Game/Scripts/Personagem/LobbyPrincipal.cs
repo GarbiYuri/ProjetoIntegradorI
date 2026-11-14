@@ -1,11 +1,13 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using Game.Scripts;
+using Game.Scripts.Games;
 using Models;
 using Service;
 
@@ -54,7 +56,21 @@ public partial class LobbyPrincipal : Node2D
 	private VBoxContainer _dashboardPlayers;
 	private VBoxContainer _dashboardJogos;
 	private Label _dashboardJogosEmpty;
+	private VBoxContainer _dashboardCatalogo;
+	private Label _dashboardResumo;
 	private Node _jogosRoot;
+
+	// ---------------------------------------------------------------------
+	// Ciclo de jogos (catálogo + portas + overlay)
+	// ---------------------------------------------------------------------
+	private GameOverlay _gameOverlay;
+	private Control _gameSessionRoot;
+	private VBoxContainer _catalogoList;
+	private Button _jogosButton;
+	private bool _jogosAberto;
+	private string _placarJogoAtual = string.Empty;
+	private int _ultimoJogadoresPublicados = -1;
+	private float _timerPublicacaoJogo;
 
 	// ---------------------------------------------------------------------
 	// Jogos internos (criados pelos ALUNOS dentro do lobby)
@@ -69,8 +85,8 @@ public partial class LobbyPrincipal : Node2D
 	private readonly List<Jogo> _jogos = new();
 	private List<AlunoOnline> _alunosConectados = new();
 
-	// Conexão interna: API de multiplayer separada, applied só no nó
-	// "World/Jogos" — o lobby continua na conexão principal.
+	// Conexão interna: API de multiplayer separada, aplicada só na raiz do
+	// overlay de jogos (GameSessionRoot) — o lobby continua na conexão principal.
 	private MultiplayerApi? _apiJogo;
 	private ENetMultiplayerPeer? _peerJogo;
 	private int _minhaPortaJogo;
@@ -107,6 +123,8 @@ public partial class LobbyPrincipal : Node2D
 		_dashboardPlayers = GetNode<VBoxContainer>("%DashboardPlayers");
 		_dashboardJogos = GetNode<VBoxContainer>("%DashboardJogos");
 		_dashboardJogosEmpty = GetNode<Label>("%DashboardJogosEmpty");
+		_dashboardCatalogo = GetNode<VBoxContainer>("%DashboardCatalogo");
+		_dashboardResumo = GetNode<Label>("%DashboardResumo");
 
 		_jogosPanel = GetNode<Control>("%JogosPanel");
 		_jogosList = GetNode<VBoxContainer>("%JogosList");
@@ -114,6 +132,13 @@ public partial class LobbyPrincipal : Node2D
 		_jogoNomeEdit = GetNode<LineEdit>("%JogoNomeEdit");
 		_criarJogoButton = GetNode<Button>("%CriarJogoButton");
 		_sairJogoButton = GetNode<Button>("%SairJogoButton");
+		_catalogoList = GetNode<VBoxContainer>("%CatalogoList");
+		_jogosButton = GetNode<Button>("%JogosButton");
+
+		// Overlay que hospeda os minigames em tela cheia.
+		_gameOverlay = GetNode<GameOverlay>("%GameOverlay");
+		_gameOverlay.Fechado += OnJogoFechado;
+		_gameSessionRoot = _gameOverlay.GetNode<Control>("GameSessionRoot");
 
 		GetNode<Button>("%SoloButton").Pressed += OnSoloPressed;
 		GetNode<Button>("%HostButton").Pressed += OnHostPressed;
@@ -126,9 +151,16 @@ public partial class LobbyPrincipal : Node2D
 		GetNode<Button>("%PainelButton").Pressed += OnPainelPressed;
 		_criarJogoButton.Pressed += OnCriarJogoPressed;
 		_sairJogoButton.Pressed += OnSairDoJogoPressed;
+		_jogosButton.Pressed += OnJogosTogglePressed;
 
-		// Onde os minigames vão entrar (INICIAR JOGO leva todos para cá).
-		_jogosRoot = GetNodeOrNull<Node>("World/Jogos");
+		// Raiz onde os minigames entram: fica dentro do overlay e recebe uma
+		// API de multiplayer própria por partida.
+		_jogosRoot = _gameSessionRoot;
+
+		// Câmera única de mapa inteiro (o personagem não liga a câmera dele).
+		AjustarCameraMapa();
+		GetViewport().SizeChanged += AjustarCameraMapa;
+		AtualizarCatalogo();
 
 		if (multiplayerSpawner != null)
 		{
@@ -159,6 +191,7 @@ public partial class LobbyPrincipal : Node2D
 			{
 				_startOverlay.Visible = false;
 				StartSolo();
+				ProcessarAtalhosDeJogo();
 				return;
 			}
 
@@ -177,6 +210,7 @@ public partial class LobbyPrincipal : Node2D
 					}
 				}
 
+				ProcessarAtalhosDeJogo();
 				return;
 			}
 
@@ -185,25 +219,37 @@ public partial class LobbyPrincipal : Node2D
 				_startOverlay.Visible = false;
 				_autoRetry = true;
 				StartClient(argument.Substring("--lobby-join=".Length));
-
-				// Atalho de teste: cria um jogo interno (conexão do aluno).
-				foreach (string extra in OS.GetCmdlineUserArgs())
-				{
-					if (extra.StartsWith("--lobby-criar-jogo"))
-					{
-						ExecutarComAtraso(LerAtraso(extra), OnCriarJogoPressed);
-					}
-					else if (extra.StartsWith("--lobby-entrar-jogo"))
-					{
-						ExecutarComAtraso(LerAtraso(extra), EntrarNoPrimeiroJogo);
-					}
-				}
-
+				ProcessarAtalhosDeJogo();
 				return;
 			}
 		}
 
 		HandleAutoStart();
+	}
+
+	/// <summary>
+	/// Atalhos de teste compartilhados por solo/host/cliente:
+	/// "--lobby-criar-jogo[=SEGUNDOS]" abre uma porta com o primeiro jogo,
+	/// "--lobby-entrar-jogo[=SEGUNDOS]" entra na primeira porta aberta e
+	/// "--lobby-jogos[=SEGUNDOS]" abre o painel de jogos do HUD.
+	/// </summary>
+	private void ProcessarAtalhosDeJogo()
+	{
+		foreach (string extra in OS.GetCmdlineUserArgs())
+		{
+			if (extra.StartsWith("--lobby-criar-jogo"))
+			{
+				ExecutarComAtraso(LerAtraso(extra), OnCriarJogoPressed);
+			}
+			else if (extra.StartsWith("--lobby-entrar-jogo"))
+			{
+				ExecutarComAtraso(LerAtraso(extra), EntrarNoPrimeiroJogo);
+			}
+			else if (extra.StartsWith("--lobby-jogos"))
+			{
+				ExecutarComAtraso(LerAtraso(extra), OnJogosTogglePressed);
+			}
+		}
 	}
 
 	// ---------------------------------------------------------------------
@@ -317,12 +363,12 @@ public partial class LobbyPrincipal : Node2D
 		_jogoIniciado = true;
 
 		// Fecha o painel: todos (professor incluso, pela câmera do host)
-		// ficam no lobby, onde ficam os minigames (World/Jogos).
+		// ficam no lobby, onde o catálogo de jogos abre as portas.
 		ShowHud();
-		SetStatus("JOGO INICIADO • todos no lobby");
+		SetStatus("JOGO INICIADO • abra uma porta no catálogo 🎮");
 		UpdatePlayersLabel();
 
-		GD.Print("[LOBBY] Jogo iniciado. Minigames entram em World/Jogos.");
+		GD.Print("[LOBBY] Jogo iniciado. Portas de jogo são abertas pelo catálogo.");
 	}
 
 	/// <summary>Executa uma ação depois de um tempo (atalhos de teste).</summary>
@@ -373,7 +419,7 @@ public partial class LobbyPrincipal : Node2D
 
 		Multiplayer.MultiplayerPeer = new OfflineMultiplayerPeer();
 		_started = true;
-		_hostCamera.Enabled = false;
+		AjustarCameraMapa();
 
 		if (_session != null) _session.lobbyMode = LobbyMode.Solo;
 
@@ -402,7 +448,7 @@ public partial class LobbyPrincipal : Node2D
 
 		Multiplayer.MultiplayerPeer = _peer;
 		_started = true;
-		_hostCamera.Enabled = true;
+		AjustarCameraMapa();
 
 		if (_session != null) _session.lobbyMode = LobbyMode.Host;
 
@@ -457,7 +503,7 @@ public partial class LobbyPrincipal : Node2D
 
 		Multiplayer.MultiplayerPeer = _peer;
 		_started = true;
-		_hostCamera.Enabled = false;
+		AjustarCameraMapa();
 
 		if (_session != null)
 		{
@@ -542,8 +588,32 @@ public partial class LobbyPrincipal : Node2D
 	private void OnPeerDisconnected(long id)
 	{
 		GD.Print($"[LOBBY] Peer desconectado: {id}");
+
+		string nome = ObterNomeDoPeer(id);
+
 		Node player = _playersRoot.GetNodeOrNull(id.ToString());
 		player?.QueueFree();
+
+		// Quem caiu do lobby não pode deixar uma porta órfã na sala.
+		if (Multiplayer.IsServer())
+		{
+			List<int> portas = _jogos
+				.Where(j => j.criador == nome)
+				.Select(j => j.porta)
+				.ToList();
+
+			foreach (int porta in portas)
+			{
+				_jogos.RemoveAll(j => j.porta == porta);
+				Rpc(nameof(ReceberJogoEncerrado), porta);
+			}
+
+			if (portas.Count > 0)
+			{
+				DivulgarJogos();
+			}
+		}
+
 		AtualizarDashboard(true);
 	}
 
@@ -637,6 +707,9 @@ public partial class LobbyPrincipal : Node2D
 		player.SetMultiplayerAuthority((int)id);
 		player.MovementBounds = playerBounds;
 
+		// No lobby todos usam a câmera de mapa inteiro.
+		player.UserCamera = false;
+
 		MultiplayerSynchronizer synchronizer = player.GetNodeOrNull<MultiplayerSynchronizer>("MultiplayerSynchronizer");
 		if (synchronizer != null)
 		{
@@ -653,11 +726,10 @@ public partial class LobbyPrincipal : Node2D
 	}
 
 	// ---------------------------------------------------------------------
-	// Jogos internos: conexão separada criada pelo ALUNO dentro do lobby
+	// Portas de jogo: cada partida é uma conexão ENet separada (7778+)
 	//
-	// O aluno não cria sala (lobby) — isso é do professor. Dentro do lobby
-	// ele abre uma "conexão interna" (outro servidor ENet, em outra porta) e
-	// os colegas da sala podem entrar nesse jogo.
+	// O jogador abre a porta pelo catálogo; o servidor do lobby registra a
+	// porta e divulga a lista para a sala. O professor acompanha pelo painel.
 	// ---------------------------------------------------------------------
 
 	/// <summary>
@@ -688,66 +760,32 @@ public partial class LobbyPrincipal : Node2D
 		_alunosConectados = lista;
 	}
 
-	private async void OnCriarJogoPressed()
+	private void OnCriarJogoPressed()
 	{
-		// Quem cria sala é o professor; aluno só cria jogo interno.
-		if (Multiplayer.IsServer())
+		// Atalho de desenvolvimento e botão "ABRIR JOGO": abre uma porta com o
+		// primeiro jogo do catálogo (o aluno escolhe o jogo nos cartões).
+		GameInfo? info = GameRegistry.Jogos.FirstOrDefault();
+
+		if (info == null)
 		{
-			_jogoStatus.Text = "O professor controla os jogos da sala.";
+			_jogoStatus.Text = "Nenhum jogo cadastrado no catálogo.";
 			return;
 		}
 
-		if (_apiJogo != null)
-		{
-			_jogoStatus.Text = "Você já está em um jogo. Saia dele antes de criar outro.";
-			return;
-		}
-
-		string nome = _jogoNomeEdit.Text.Trim();
-
-		if (string.IsNullOrWhiteSpace(nome))
-		{
-			nome = $"Jogo de {_session?.playerName ?? "Aluno"}";
-		}
-
-		int porta = CriarServidorInterno();
-
-		if (porta == 0)
-		{
-			_jogoStatus.Text = "Não foi possível abrir a conexão interna (portas ocupadas).";
-			return;
-		}
-
-		// Registra no banco (o jogo é uma conexão interna da sala).
-		try
-		{
-			await JogoService.Criar(
-				nome,
-				_session?.salaId > 0 ? _session.salaId : null,
-				null,
-				_session?.playerName ?? "Aluno",
-				MeuIp(),
-				porta);
-		}
-		catch (Exception e)
-		{
-			GD.PrintErr("[JOGO] Não foi possível registrar o jogo no banco: " + e.Message);
-		}
-
-		// Avisa o servidor do lobby, que divulga o jogo para toda a sala.
-		RpcId(1, nameof(RequisitarJogo), nome, porta, MeuIp());
-
-		_jogoNomeEdit.Text = string.Empty;
-		_jogoStatus.Text = $"Jogo \"{nome}\" criado! Os colegas da sala já podem entrar.";
-		AtualizarListaJogos();
+		AbrirJogoDoCatalogo(info);
 	}
 
 	/// <summary>
-	/// Sobe o servidor da conexão interna em uma porta livre (7778 em diante)
+	/// Sobe o servidor da partida em uma porta livre (7778 em diante)
 	/// e devolve a porta usada (0 = nenhuma porta livre).
 	/// </summary>
 	private int CriarServidorInterno()
 	{
+		if (_jogosRoot == null || !_jogosRoot.IsInsideTree())
+		{
+			return 0;
+		}
+
 		for (int tentativa = 0; tentativa < 10; tentativa++)
 		{
 			int porta = 7778 + tentativa;
@@ -763,26 +801,352 @@ public partial class LobbyPrincipal : Node2D
 			var api = MultiplayerApi.CreateDefaultInterface();
 			api.MultiplayerPeer = peer;
 
-			// A API do jogo vale só para o nó "World/Jogos": a conexão do
+			// A API do jogo vale só para a raiz do overlay: a conexão do
 			// lobby (principal) continua intacta.
 			GetTree().SetMultiplayer(api, _jogosRoot.GetPath());
 
 			_apiJogo = api;
 			_peerJogo = peer;
 			_minhaPortaJogo = porta;
+			_ultimoJogadoresPublicados = 1;
+			_placarJogoAtual = string.Empty;
 			_sairJogoButton.Visible = true;
 
-			GD.Print($"[JOGO] Conexão interna aberta na porta {porta}.");
+			GD.Print($"[JOGO] Porta aberta na {porta}.");
 			return porta;
 		}
 
 		return 0;
 	}
 
-	/// <summary>Aluno pede para abrir um jogo (o servidor do lobby divulga).</summary>
+	/// <summary>
+	/// Abre uma porta para o jogo escolhido no catálogo. Quem abre vira o
+	/// dono da porta (host da partida); o lobby registra e divulga a porta.
+	/// O jogador NÃO precisa de conta: convidados também podem abrir.
+	/// </summary>
+	private void AbrirJogoDoCatalogo(GameInfo info)
+	{
+		if (!_started)
+		{
+			_jogoStatus.Text = "Entre no lobby antes de abrir um jogo.";
+			return;
+		}
+
+		if (_gameOverlay.Aberto || _apiJogo != null)
+		{
+			_jogoStatus.Text = "Você já está em uma partida. Feche-a antes de abrir outra.";
+			return;
+		}
+
+		if (!GameRegistry.CenaExiste(info))
+		{
+			_jogoStatus.Text = $"A cena do jogo \"{info.Nome}\" não foi encontrada.";
+			GD.PrintErr($"[JOGO] Cena ausente: {info.Cena}");
+			return;
+		}
+
+		string nomePorta = _jogoNomeEdit.Text.Trim();
+
+		if (string.IsNullOrWhiteSpace(nomePorta))
+		{
+			nomePorta = info.Nome;
+		}
+
+		int porta = CriarServidorInterno();
+
+		if (porta == 0)
+		{
+			_jogoStatus.Text = "Não foi possível abrir a porta do jogo (portas 7778+ ocupadas).";
+			return;
+		}
+
+		var jogo = new Jogo(
+			nomePorta,
+			_session?.sala?.id ?? (_session?.salaId > 0 ? _session.salaId : null),
+			_session?.usuario?.id,
+			_session?.playerName ?? "Jogador",
+			MeuIp(),
+			porta,
+			info.Id);
+
+		jogo.jogadores = 1;
+		_jogoConectado = jogo;
+		_jogoNomeEdit.Text = string.Empty;
+		_jogosPanel.Visible = false;
+		_jogosAberto = false;
+
+		if (Multiplayer.IsServer())
+		{
+			RegistrarJogoServidor(jogo);
+		}
+		else
+		{
+			// O servidor do lobby divulga a porta para toda a sala.
+			RpcId(1, nameof(RequisitarJogo), jogo.nome, porta, jogo.host_ip, info.Id);
+		}
+
+		_ = RegistrarJogoNoBanco(jogo);
+
+		_jogoStatus.Text = $"Porta {porta} aberta para {info.Nome}. Os colegas já podem entrar.";
+		AbrirCenaDoJogo(info, porta, souHost: true);
+	}
+
+	/// <summary>Grava a porta no banco (quando o banco está disponível).</summary>
+	private async System.Threading.Tasks.Task RegistrarJogoNoBanco(Jogo jogo)
+	{
+		try
+		{
+			await JogoService.Criar(
+				jogo.nome,
+				jogo.id_sala,
+				jogo.id_aluno,
+				jogo.criador,
+				jogo.host_ip,
+				jogo.porta,
+				jogo.gameKey);
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr("[JOGO] Não foi possível registrar a porta no banco: " + e.Message);
+		}
+	}
+
+	/// <summary>
+	/// Instancia a cena do jogo e entrega o GameContexto. O overlay cuida de
+	/// mostrar em tela cheia e devolver o controle ao lobby ao fechar.
+	/// </summary>
+	private void AbrirCenaDoJogo(GameInfo info, int porta, bool souHost)
+	{
+		if (!ResourceLoader.Exists(info.Cena))
+		{
+			_jogoStatus.Text = $"Cena do jogo \"{info.Nome}\" não encontrada.";
+			FecharConexaoJogo();
+			return;
+		}
+
+		PackedScene? cena = GD.Load<PackedScene>(info.Cena);
+
+		if (cena == null || cena.Instantiate() is not MinigameBase jogo)
+		{
+			_jogoStatus.Text = $"O jogo \"{info.Nome}\" não segue o contrato de minigame.";
+			GD.PrintErr($"[JOGO] A cena {info.Cena} não herda de MinigameBase.");
+			FecharConexaoJogo();
+			return;
+		}
+
+		jogo.StatusMudou += mensagem => SetStatus(mensagem);
+		jogo.JogoTerminou += resumo => PublicarResultadoJogo(porta, resumo);
+		jogo.PlacarMudou += resumo => PublicarResultadoJogo(porta, resumo);
+
+		var contexto = new GameContexto
+		{
+			Jogo = info,
+			SouHost = souHost,
+			Porta = porta,
+			Jogador = _session?.playerName ?? "Jogador",
+			Nick = _session?.playerNick ?? string.Empty,
+			Sala = _session?.roomName ?? string.Empty,
+			SalaId = _session?.salaId ?? 0,
+			Sair = () => _gameOverlay.Fechar(),
+			Avisar = mensagem => SetStatus(mensagem)
+		};
+
+		TravarPersonagem(true);
+		_gameOverlay.Abrir(info, jogo, contexto);
+	}
+
+	/// <summary>
+	/// Publica o placar (parcial ou final) no painel do professor. Só o dono
+	/// da porta envia, e apenas quando o resumo muda de verdade.
+	/// </summary>
+	private void PublicarResultadoJogo(int porta, string resumo)
+	{
+		if (porta <= 0 || porta != _minhaPortaJogo)
+		{
+			return;
+		}
+
+		string texto = resumo ?? string.Empty;
+
+		if (texto == _placarJogoAtual)
+		{
+			return;
+		}
+
+		_placarJogoAtual = texto;
+		int jogadores = Math.Max(1, (_apiJogo?.GetPeers().Length ?? 0) + 1);
+		PublicarProgressoJogo(porta, jogadores, _placarJogoAtual);
+	}
+
+	/// <summary>Manda para o servidor do lobby quantos jogadores/placar a porta tem.</summary>
+	private void PublicarProgressoJogo(int porta, int jogadores, string placar)
+	{
+		if (porta <= 0)
+		{
+			return;
+		}
+
+		if (Multiplayer.IsServer())
+		{
+			AtualizarPortaJogoServidor(porta, jogadores, placar);
+		}
+		else
+		{
+			RpcId(1, nameof(AtualizarPortaJogo), porta, jogadores, placar ?? string.Empty);
+		}
+	}
+
+	/// <summary>Servidor do lobby: atualiza a porta e divulga a lista nova.</summary>
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false,
 		TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequisitarJogo(string nome, int porta, string ip)
+	private void AtualizarPortaJogo(int porta, int jogadores, string placar)
+	{
+		if (Multiplayer.IsServer())
+		{
+			AtualizarPortaJogoServidor(porta, jogadores, placar);
+		}
+	}
+
+	private void AtualizarPortaJogoServidor(int porta, int jogadores, string placar)
+	{
+		Jogo? jogo = _jogos.FirstOrDefault(j => j.porta == porta);
+
+		if (jogo == null)
+		{
+			return;
+		}
+
+		jogo.jogadores = Math.Max(1, jogadores);
+		jogo.placar = placar ?? string.Empty;
+		DivulgarJogos();
+	}
+
+	private void RegistrarJogoServidor(Jogo jogo)
+	{
+		_jogos.RemoveAll(j => j.porta == jogo.porta || j.criador == jogo.criador);
+		_jogos.Add(jogo);
+		DivulgarJogos();
+	}
+
+	private void RemoverJogoServidor(int porta)
+	{
+		if (_jogos.RemoveAll(j => j.porta == porta) > 0)
+		{
+			DivulgarJogos();
+		}
+	}
+
+	// ---------------------------------------------------------------------
+	// Catálogo de jogos e HUD
+	// ---------------------------------------------------------------------
+
+	private void OnJogosTogglePressed()
+	{
+		_jogosAberto = !_jogosAberto;
+		_jogosPanel.Visible = _jogosAberto;
+		AtualizarListaJogos();
+	}
+
+	/// <summary>Preenche o catálogo do aluno e o do professor a partir do registro.</summary>
+	private void AtualizarCatalogo()
+	{
+		PreencherCatalogo(_catalogoList, professor: false);
+		PreencherCatalogo(_dashboardCatalogo, professor: true);
+	}
+
+	private void PreencherCatalogo(VBoxContainer? alvo, bool professor)
+	{
+		if (alvo == null)
+		{
+			return;
+		}
+
+		LimparFilhos(alvo);
+
+		foreach (GameInfo info in GameRegistry.Jogos)
+		{
+			var cartao = UIHelpers.Cartao();
+			var linha = UIHelpers.Linha(10);
+
+			var textos = new VBoxContainer
+			{
+				SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+			};
+			textos.AddThemeConstantOverride("separation", 2);
+
+			Label titulo = UIHelpers.Texto($"{info.Emblema}  {info.Nome}", professor ? 14 : 15);
+			titulo.AddThemeColorOverride("font_color", info.Cor.Lightened(0.2f));
+			textos.AddChild(titulo);
+
+			textos.AddChild(UIHelpers.TextoSuaveLabel(info.Descricao, 11));
+
+			string faixa = info.MinJogadores == info.MaxJogadores
+				? $"{info.MaxJogadores} jogador(es)"
+				: $"{info.MinJogadores}-{info.MaxJogadores} jogadores";
+			textos.AddChild(UIHelpers.TextoSuaveLabel($"{info.Categoria} • {faixa}", 10));
+
+			linha.AddChild(textos);
+
+			var abrir = new Button
+			{
+				Text = professor ? "ABRIR" : "ABRIR PORTA",
+				FocusMode = Control.FocusModeEnum.None,
+				CustomMinimumSize = new Vector2(professor ? 78 : 112, 0)
+			};
+			abrir.AddThemeFontSizeOverride("font_size", professor ? 12 : 13);
+			abrir.Disabled = !GameRegistry.CenaExiste(info);
+			abrir.Pressed += () => AbrirJogoDoCatalogo(info);
+			linha.AddChild(abrir);
+
+			cartao.AddChild(linha);
+			alvo.AddChild(cartao);
+		}
+	}
+
+	// ---------------------------------------------------------------------
+	// Câmera de mapa inteiro e trava do personagem
+	// ---------------------------------------------------------------------
+
+	/// <summary>Enquadra o lobby inteiro, sem o zoom do personagem.</summary>
+	private void AjustarCameraMapa()
+	{
+		if (_hostCamera == null)
+		{
+			return;
+		}
+
+		Vector2 tamanho = GetViewportRect().Size;
+
+		if (tamanho.X <= 1 || tamanho.Y <= 1)
+		{
+			return;
+		}
+
+		float zoom = Mathf.Min(tamanho.X / 1320f, tamanho.Y / 820f);
+		zoom = Mathf.Clamp(zoom, 0.62f, 1.0f);
+
+		_hostCamera.Zoom = new Vector2(zoom, zoom);
+		_hostCamera.Position = new Vector2(0, 8);
+		_hostCamera.Enabled = true;
+	}
+
+	/// <summary>Impede o personagem de andar enquanto o jogo está aberto.</summary>
+	private void TravarPersonagem(bool travado)
+	{
+		foreach (Node filho in _playersRoot.GetChildren())
+		{
+			if (filho is Personagem personagem && personagem.IsMultiplayerAuthority())
+			{
+				personagem.InputLocked = travado;
+			}
+		}
+	}
+
+
+	/// <summary>Aluno pede para abrir uma porta (o servidor do lobby divulga).</summary>
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false,
+		TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void RequisitarJogo(string nome, int porta, string ip, string gameKey)
 	{
 		if (!Multiplayer.IsServer())
 		{
@@ -798,16 +1162,17 @@ public partial class LobbyPrincipal : Node2D
 			null,
 			criador,
 			string.IsNullOrWhiteSpace(ip) ? ObterIpDoPeer(remetente) : ip,
-			porta);
+			porta,
+			gameKey);
 
-		// Um jogo por aluno: o anterior é substituído.
+		// Um jogo por aluno: a porta anterior é substituída.
 		_jogos.RemoveAll(j => j.criador == criador);
 		_jogos.Add(jogo);
 
 		DivulgarJogos();
 	}
 
-	/// <summary>Fecha um jogo interno (pedido do dono do jogo ou do professor).</summary>
+	/// <summary>Fecha uma porta (pedido do dono do jogo ou do professor).</summary>
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false,
 		TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void PedirFecharJogo(string nome, int porta)
@@ -817,9 +1182,30 @@ public partial class LobbyPrincipal : Node2D
 			return;
 		}
 
-		_jogos.RemoveAll(j => j.porta == porta && (j.nome == nome || j.criador == ObterNomeDoPeer(Multiplayer.GetRemoteSenderId())));
+		_jogos.RemoveAll(j => j.porta == porta);
 		DivulgarJogos();
+
+		// Avisa quem está dentro da partida para voltar ao lobby.
+		Rpc(nameof(ReceberJogoEncerrado), porta);
 	}
+
+	/// <summary>O servidor do lobby avisa que uma porta foi encerrada.</summary>
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true,
+		TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void ReceberJogoEncerrado(int porta)
+	{
+		if (!_gameOverlay.Aberto)
+		{
+			return;
+		}
+
+		if (porta == _minhaPortaJogo || porta == _jogoConectado?.porta)
+		{
+			_jogoStatus.Text = "A porta desta partida foi encerrada.";
+			_gameOverlay.Fechar();
+		}
+	}
+
 
 	/// <summary>O servidor do lobby manda a lista de jogos para todos.</summary>
 	private void DivulgarJogos()
@@ -850,9 +1236,17 @@ public partial class LobbyPrincipal : Node2D
 
 	private void EntrarNoJogo(Jogo jogo)
 	{
-		if (_apiJogo != null)
+		if (_gameOverlay.Aberto || _apiJogo != null)
 		{
-			_jogoStatus.Text = "Você já está em um jogo. Saia dele antes de entrar em outro.";
+			_jogoStatus.Text = "Você já está em uma partida. Feche-a antes de entrar em outra.";
+			return;
+		}
+
+		GameInfo? info = GameRegistry.PorId(jogo.gameKey) ?? GameRegistry.Jogos.FirstOrDefault();
+
+		if (info == null)
+		{
+			_jogoStatus.Text = "O jogo desta porta não está mais no catálogo.";
 			return;
 		}
 
@@ -862,7 +1256,7 @@ public partial class LobbyPrincipal : Node2D
 		if (erro != Error.Ok)
 		{
 			peer.Dispose();
-			_jogoStatus.Text = $"Não foi possível entrar no jogo \"{jogo.nome}\" (erro {erro}).";
+			_jogoStatus.Text = $"Não foi possível entrar na porta {jogo.porta} (erro {erro}).";
 			return;
 		}
 
@@ -873,18 +1267,25 @@ public partial class LobbyPrincipal : Node2D
 		_apiJogo = api;
 		_peerJogo = peer;
 		_jogoConectado = jogo;
+		_minhaPortaJogo = 0;
+		_ultimoJogadoresPublicados = -1;
+		_placarJogoAtual = string.Empty;
 		_sairJogoButton.Visible = true;
+		_jogosPanel.Visible = false;
+		_jogosAberto = false;
 
-		_jogoStatus.Text = $"Conectado ao jogo \"{jogo.nome}\" (criado por {jogo.criador}).";
-		GD.Print($"[JOGO] Conectado ao jogo '{jogo.nome}' em {jogo.host_ip}:{jogo.porta}.");
+		_jogoStatus.Text = $"Entrando na porta {jogo.porta} • {info.Nome} • criada por {jogo.criador}.";
+		GD.Print($"[JOGO] Conectando em {jogo.host_ip}:{jogo.porta} ({info.Id}).");
+
+		AbrirCenaDoJogo(info, jogo.porta, souHost: false);
 	}
 
 	private void EntrarNoPrimeiroJogo()
 	{
-		// Atalho de desenvolvimento: entra no primeiro jogo da lista.
+		// Atalho de desenvolvimento: entra na primeira porta aberta.
 		if (_jogos.Count == 0)
 		{
-			GD.Print("[JOGO] Nenhum jogo disponível para entrar.");
+			GD.Print("[JOGO] Nenhuma porta disponível para entrar.");
 			return;
 		}
 
@@ -893,20 +1294,44 @@ public partial class LobbyPrincipal : Node2D
 
 	private void FecharMeuJogo(Jogo jogo)
 	{
-		// Avisa o servidor do lobby para tirar o jogo da lista da sala.
-		RpcId(1, nameof(PedirFecharJogo), jogo.nome, jogo.porta);
+		bool envolvido = jogo.porta == _minhaPortaJogo || jogo.porta == _jogoConectado?.porta;
 
-		FecharConexaoJogo();
-		_jogoStatus.Text = $"Você fechou o jogo \"{jogo.nome}\".";
+		if (Multiplayer.IsServer())
+		{
+			// O professor (ou o dono no modo solo) encerra a porta para todos.
+			RemoverJogoServidor(jogo.porta);
+			Rpc(nameof(ReceberJogoEncerrado), jogo.porta);
+		}
+		else
+		{
+			// O dono pede ao servidor do lobby para tirar a porta da lista.
+			RpcId(1, nameof(PedirFecharJogo), jogo.nome, jogo.porta);
+		}
+
+		if (envolvido)
+		{
+			_gameOverlay.Fechar(); // dispara OnJogoFechado (limpeza)
+		}
+
+		_jogoStatus.Text = $"Porta \"{jogo.nome}\" encerrada.";
 	}
 
 	private void OnSairDoJogoPressed()
 	{
+		if (_gameOverlay.Aberto)
+		{
+			_gameOverlay.Fechar();
+			return;
+		}
+
 		FecharConexaoJogo();
-		_jogoStatus.Text = "Você saiu do jogo. Já pode entrar em outro.";
+		_jogoStatus.Text = "Você saiu do jogo. Já pode entrar em outra porta.";
 	}
 
-	/// <summary>Encerra a conexão interna (jogo) e volta para o lobby.</summary>
+	/// <summary>
+	/// Encerra só a conexão da partida (peer/API). A limpeza de interface fica
+	/// em <see cref="OnJogoFechado"/>, chamado pelo overlay.
+	/// </summary>
 	private void FecharConexaoJogo()
 	{
 		if (_peerJogo != null)
@@ -915,30 +1340,69 @@ public partial class LobbyPrincipal : Node2D
 			_peerJogo = null;
 		}
 
-		if (_apiJogo != null)
+		if (_apiJogo != null && _jogosRoot != null && IsInstanceValid(_jogosRoot) && _jogosRoot.IsInsideTree())
 		{
 			GetTree().SetMultiplayer(null, _jogosRoot.GetPath());
 			_apiJogo = null;
 		}
 
+		_apiJogo = null;
 		_jogoConectado = null;
 		_minhaPortaJogo = 0;
+		_ultimoJogadoresPublicados = -1;
+		_placarJogoAtual = string.Empty;
 		_sairJogoButton.Visible = false;
+	}
+
+	/// <summary>Chamado quando o overlay fecha (Esc, botão ou fim de partida).</summary>
+	private void OnJogoFechado()
+	{
+		bool eraDono = _minhaPortaJogo > 0;
+		int porta = _minhaPortaJogo;
+		Jogo? jogo = _jogoConectado;
+
+		FecharConexaoJogo();
+		TravarPersonagem(false);
+		_jogosPanel.Visible = false;
+		_jogosAberto = false;
+
+		if (eraDono && porta > 0)
+		{
+			if (Multiplayer.IsServer())
+			{
+				RemoverJogoServidor(porta);
+
+				// Quem estava na partida volta ao lobby junto com o dono.
+				Rpc(nameof(ReceberJogoEncerrado), porta);
+			}
+			else
+			{
+				RpcId(1, nameof(PedirFecharJogo), jogo?.nome ?? string.Empty, porta);
+			}
+
+			_jogoStatus.Text = "Você fechou a porta e voltou ao lobby.";
+		}
+		else if (jogo != null)
+		{
+			_jogoStatus.Text = "Você saiu da partida e voltou ao lobby.";
+		}
+
+		AtualizarListaJogos();
 	}
 
 	private void AtualizarListaJogos()
 	{
-		// Lista do aluno (HUD do lobby).
+		// ---- Lista do aluno (HUD do lobby) -----------------------------
 		if (_jogosList != null)
 		{
-			foreach (Node linha in _jogosList.GetChildren())
-			{
-				_jogosList.RemoveChild(linha);
-				linha.QueueFree();
-			}
+			LimparFilhos(_jogosList);
 
 			foreach (Jogo jogo in _jogos)
 			{
+				GameInfo? info = GameRegistry.PorId(jogo.gameKey);
+				string titulo = info?.Nome ?? jogo.nome;
+				string emblema = info?.Emblema ?? "★";
+
 				var cartao = UIHelpers.Cartao();
 				var linha = UIHelpers.Linha(8);
 
@@ -946,8 +1410,24 @@ public partial class LobbyPrincipal : Node2D
 				{
 					SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
 				};
-				textos.AddChild(UIHelpers.Texto(jogo.nome, 16));
-				textos.AddChild(UIHelpers.TextoSuaveLabel($"criado por {jogo.criador}", 13));
+				textos.AddThemeConstantOverride("separation", 2);
+
+				Label nomeJogo = UIHelpers.Texto($"{emblema}  {titulo}", 15);
+				if (info != null)
+				{
+					nomeJogo.AddThemeColorOverride("font_color", info.Cor.Lightened(0.2f));
+				}
+				textos.AddChild(nomeJogo);
+
+				textos.AddChild(UIHelpers.TextoSuaveLabel(
+					$"{jogo.nome} • {jogo.criador} • porta {jogo.porta}", 11));
+
+				string detalhe = $"{Math.Max(1, jogo.jogadores)} jogador(es) • {jogo.status}";
+				if (!string.IsNullOrWhiteSpace(jogo.placar))
+				{
+					detalhe += $" • {jogo.placar}";
+				}
+				textos.AddChild(UIHelpers.TextoSuaveLabel(detalhe, 10));
 
 				linha.AddChild(textos);
 
@@ -955,14 +1435,17 @@ public partial class LobbyPrincipal : Node2D
 
 				if (souDono)
 				{
-					var fechar = new Button { Text = "FECHAR" };
+					var fechar = new Button { Text = "FECHAR", FocusMode = Control.FocusModeEnum.None };
+					fechar.AddThemeFontSizeOverride("font_size", 12);
 					Jogo jogoAlvo = jogo;
 					fechar.Pressed += () => FecharMeuJogo(jogoAlvo);
 					linha.AddChild(fechar);
 				}
 				else
 				{
-					var entrar = new Button { Text = "ENTRAR" };
+					var entrar = new Button { Text = "ENTRAR", FocusMode = Control.FocusModeEnum.None };
+					entrar.AddThemeFontSizeOverride("font_size", 12);
+					entrar.Disabled = _gameOverlay.Aberto || _apiJogo != null;
 					Jogo jogoAlvo = jogo;
 					entrar.Pressed += () => EntrarNoJogo(jogoAlvo);
 					linha.AddChild(entrar);
@@ -971,47 +1454,95 @@ public partial class LobbyPrincipal : Node2D
 				cartao.AddChild(linha);
 				_jogosList.AddChild(cartao);
 			}
+
+			if (_jogos.Count == 0)
+			{
+				_jogosList.AddChild(UIHelpers.TextoSuaveLabel(
+					"Nenhuma porta aberta. Escolha um jogo no catálogo acima.", 12));
+			}
 		}
 
-		// Lista do professor (painel de gerenciamento).
+		// ---- Lista do professor (painel de gerenciamento) --------------
 		if (_dashboardJogos != null)
 		{
-			foreach (Node linha in _dashboardJogos.GetChildren())
-			{
-				_dashboardJogos.RemoveChild(linha);
-				linha.QueueFree();
-			}
+			LimparFilhos(_dashboardJogos);
 
 			foreach (Jogo jogo in _jogos)
 			{
+				GameInfo? info = GameRegistry.PorId(jogo.gameKey);
+				string titulo = info?.Nome ?? jogo.nome;
+				string emblema = info?.Emblema ?? "★";
+
 				var cartao = UIHelpers.Cartao();
-				var linha = UIHelpers.Linha(8);
+				var coluna = UIHelpers.Coluna(3);
 
-				linha.AddChild(UIHelpers.TextoExpandido(jogo.nome, 16));
-				linha.AddChild(UIHelpers.TextoSuaveLabel(jogo.criador, 13));
+				var header = UIHelpers.Linha(8);
+				Label nomeJogo = UIHelpers.TextoExpandido($"{emblema}  {titulo}", 15);
+				if (info != null)
+				{
+					nomeJogo.AddThemeColorOverride("font_color", info.Cor.Lightened(0.2f));
+				}
+				header.AddChild(nomeJogo);
 
-				var encerrar = new Button { Text = "ENCERRAR" };
+				var encerrar = new Button { Text = "ENCERRAR", FocusMode = Control.FocusModeEnum.None };
+				encerrar.AddThemeFontSizeOverride("font_size", 11);
 				Jogo jogoAlvo = jogo;
 				encerrar.Pressed += () => FecharMeuJogo(jogoAlvo);
-				linha.AddChild(encerrar);
+				header.AddChild(encerrar);
 
-				cartao.AddChild(linha);
+				coluna.AddChild(header);
+				coluna.AddChild(UIHelpers.TextoSuaveLabel(
+					$"\"{jogo.nome}\" • {jogo.criador} • porta {jogo.porta}", 11));
+				coluna.AddChild(UIHelpers.TextoSuaveLabel(
+					$"{Math.Max(1, jogo.jogadores)} jogador(es) • {jogo.status} • sala {jogo.id_sala?.ToString() ?? "—"}", 10));
+
+				if (!string.IsNullOrWhiteSpace(jogo.placar))
+				{
+					coluna.AddChild(UIHelpers.TextoSuaveLabel("Placar: " + jogo.placar, 10));
+				}
+
+				cartao.AddChild(coluna);
 				_dashboardJogos.AddChild(cartao);
 			}
 
 			_dashboardJogosEmpty.Visible = _jogos.Count == 0;
 		}
 
+		if (_dashboardResumo != null)
+		{
+			int emPartida = _jogos.Sum(j => Math.Max(1, j.jogadores));
+			_dashboardResumo.Text = _jogos.Count == 0
+				? "Nenhuma porta aberta • os alunos podem abrir pelo catálogo."
+				: $"{_jogos.Count} porta(s) aberta(s) • {emPartida} jogador(es) em partidas";
+		}
+
+		if (_jogosButton != null)
+		{
+			_jogosButton.Text = _jogos.Count > 0
+				? $"🎮 JOGOS ({_jogos.Count})"
+				: "🎮 JOGOS";
+		}
+
 		// Resumo para o aluno (quando não está dentro de um jogo).
-		if (_jogoConectado == null && _minhaPortaJogo == 0 && _jogos.Count > 0)
+		if (_jogoConectado == null && _minhaPortaJogo == 0 && _jogos.Count > 0 &&
+			!_gameOverlay.Aberto && _jogoStatus != null)
 		{
 			_jogoStatus.Text = _jogos.Count == 1
-				? "1 jogo disponível. Escolha um para entrar."
-				: $"{_jogos.Count} jogos disponíveis. Escolha um para entrar.";
+				? "1 porta aberta. Escolha um jogo no catálogo ou entre na porta."
+				: $"{_jogos.Count} portas abertas. Escolha um jogo no catálogo ou entre em uma porta.";
 		}
 	}
 
-	/// <summary>IP desta máquina (usado para o endereço do jogo interno).</summary>
+	private static void LimparFilhos(Node pai)
+	{
+		foreach (Node filho in pai.GetChildren())
+		{
+			pai.RemoveChild(filho);
+			filho.QueueFree();
+		}
+	}
+
+	/// <summary>IP desta máquina (usado como endereço da porta de jogo).</summary>
 	private string MeuIp()
 	{
 		try
@@ -1068,9 +1599,15 @@ public partial class LobbyPrincipal : Node2D
 		// O professor não tem personagem: a dica de andar é só dos alunos.
 		_hintLabel.Visible = _session?.lobbyMode != LobbyMode.Host;
 
-		// Criar jogo interno é exclusivo dos alunos (o professor gerencia).
-		_jogosPanel.Visible = !Multiplayer.IsServer();
+		// O painel de jogos começa fechado (HUD compacto). No modo solo o
+		// catálogo também aparece para o jogador abrir a própria porta.
+		bool servidor = Multiplayer.IsServer();
+		_jogosButton.Visible = !servidor || _session?.lobbyMode == LobbyMode.Solo;
+		_jogosAberto = false;
+		_jogosPanel.Visible = false;
 
+		AtualizarCatalogo();
+		AtualizarListaJogos();
 		UpdatePlayersLabel();
 	}
 
@@ -1079,7 +1616,11 @@ public partial class LobbyPrincipal : Node2D
 		_startOverlay.Visible = false;
 		_hud.Visible = false;
 		_dashboard.Visible = true;
+		_jogosPanel.Visible = false;
+		_jogosAberto = false;
 		_dashboardRoom.Text = string.IsNullOrWhiteSpace(_session?.roomName) ? "Lobby" : _session.roomName;
+		AtualizarCatalogo();
+		AtualizarListaJogos();
 		AtualizarDashboard(true);
 	}
 
@@ -1087,6 +1628,8 @@ public partial class LobbyPrincipal : Node2D
 	{
 		_hud.Visible = false;
 		_dashboard.Visible = false;
+		_jogosPanel.Visible = false;
+		_jogosButton.Visible = false;
 		_startOverlay.Visible = true;
 		_messageLabel.Text = message;
 	}
@@ -1200,6 +1743,25 @@ public partial class LobbyPrincipal : Node2D
 
 		AtualizarStatusJogo();
 
+		// O dono da porta publica no painel do professor quantos jogadores
+		// estão na partida (e o placar final quando o jogo termina).
+		if (_minhaPortaJogo > 0 && _gameOverlay.Aberto)
+		{
+			_timerPublicacaoJogo += (float)delta;
+
+			if (_timerPublicacaoJogo >= 1f)
+			{
+				_timerPublicacaoJogo = 0f;
+				int jogadores = Math.Max(1, (_apiJogo?.GetPeers().Length ?? 0) + 1);
+
+				if (jogadores != _ultimoJogadoresPublicados)
+				{
+					_ultimoJogadoresPublicados = jogadores;
+					PublicarProgressoJogo(_minhaPortaJogo, jogadores, _placarJogoAtual);
+				}
+			}
+		}
+
 		// A lista de alunos da sala (vai no anúncio para a tela do aluno)
 		// é refeita de tempos em tempos, na thread principal.
 		_timerAlunos += (float)delta;
@@ -1212,8 +1774,8 @@ public partial class LobbyPrincipal : Node2D
 	}
 
 	/// <summary>
-	/// Mostra quantas pessoas estão na conexão interna do jogo e atualiza a
-	/// lista de jogos (o servidor pode mudar a qualquer momento).
+	/// Mostra quantas pessoas estão na porta da partida e atualiza a lista de
+	/// jogos (o servidor pode mudar a qualquer momento).
 	/// </summary>
 	private void AtualizarStatusJogo()
 	{
@@ -1224,20 +1786,22 @@ public partial class LobbyPrincipal : Node2D
 
 		if (_peerJogo != null && _minhaPortaJogo > 0)
 		{
-			// Sou o dono do jogo: mostra quantos colegas entraram.
-			int conectados = _apiJogo?.GetPeers().Length ?? 0;
+			// Sou o dono da porta: mostra quantos colegas entraram.
+			int conectados = (_apiJogo?.GetPeers().Length ?? 0) + 1;
 
 			if (conectados != _ultimoCountJogo)
 			{
 				_ultimoCountJogo = conectados;
-				GD.Print($"[JOGO] Jogadores na conexão interna: {conectados}.");
+				GD.Print($"[JOGO] Jogadores na porta {_minhaPortaJogo}: {conectados}.");
 			}
 
-			_jogoStatus.Text = $"Seu jogo está na porta {_minhaPortaJogo} • {conectados} jogador(es) conectado(s).";
+			_jogoStatus.Text = $"Sua porta {_minhaPortaJogo} • {conectados} jogador(es) • " +
+							   (_gameOverlay.Aberto ? "em partida" : "no lobby") +
+							   (string.IsNullOrWhiteSpace(_placarJogoAtual) ? string.Empty : $" • {_placarJogoAtual}");
 		}
 		else if (_jogoConectado != null)
 		{
-			_jogoStatus.Text = $"No jogo \"{_jogoConectado.nome}\" • criado por {_jogoConectado.criador}.";
+			_jogoStatus.Text = $"Na porta {_jogoConectado.porta} • {_jogoConectado.nome} • dono: {_jogoConectado.criador}.";
 		}
 	}
 
@@ -1252,6 +1816,16 @@ public partial class LobbyPrincipal : Node2D
 		if (_retryTimer != null)
 		{
 			_retryTimer.Timeout -= OnRetryTimeout;
+		}
+
+		if (_gameOverlay != null)
+		{
+			_gameOverlay.Fechado -= OnJogoFechado;
+		}
+
+		if (IsInsideTree())
+		{
+			GetViewport().SizeChanged -= AjustarCameraMapa;
 		}
 
 		_autoRetry = false;

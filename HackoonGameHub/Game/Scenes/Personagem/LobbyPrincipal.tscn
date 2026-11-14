@@ -1,8 +1,9 @@
-[gd_scene load_steps=15 format=3 uid="uid://bvtwy4yjfe7gd"]
+[gd_scene load_steps=16 format=3 uid="uid://bvtwy4yjfe7gd"]
 
 [ext_resource type="Script" uid="uid://bochi1hpem50w" path="res://Scripts/Personagem/LobbyPrincipal.cs" id="1_lobby"]
 [ext_resource type="PackedScene" uid="uid://2xapy6q32s6t" path="res://Scenes/Personagem/Personagem.tscn" id="2_player"]
 [ext_resource type="Theme" path="res://Assets/Theme/HackoonTheme.tres" id="3_theme"]
+[ext_resource type="PackedScene" path="res://Scenes/Games/GameOverlay.tscn" id="4_overlay"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 18.0
@@ -275,8 +276,9 @@ position = Vector2(0, 190)
 y_sort_enabled = true
 
 [node name="HostCamera" type="Camera2D" parent="."]
-enabled = false
-zoom = Vector2(0.9, 0.9)
+position = Vector2(0, 10)
+enabled = true
+zoom = Vector2(0.82, 0.82)
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://2xapy6q32s6t")
@@ -331,7 +333,7 @@ anchor_right = 1.0
 offset_left = -220.0
 offset_top = 20.0
 offset_right = -20.0
-offset_bottom = 122.0
+offset_bottom = 158.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
@@ -344,6 +346,12 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Jogadores: 0"
 horizontal_alignment = 1
+
+[node name="JogosButton" type="Button" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "🎮 JOGOS"
+tooltip_text = "Abrir o catálogo e as portas de jogo"
 
 [node name="PainelButton" type="Button" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
 unique_name_in_owner = true
@@ -361,8 +369,8 @@ visible = false
 layout_mode = 1
 offset_left = 20.0
 offset_top = 140.0
-offset_right = 400.0
-offset_bottom = 430.0
+offset_right = 410.0
+offset_bottom = 620.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="VBox" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel"]
@@ -373,7 +381,7 @@ theme_override_constants/separation = 8
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
 theme_override_font_sizes/font_size = 18
-text = "JOGOS ONLINE"
+text = "JOGOS DO HUB"
 
 [node name="CriarRow" type="HBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
 layout_mode = 2
@@ -383,14 +391,39 @@ theme_override_constants/separation = 8
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Nome do seu jogo"
+placeholder_text = "Nome da sua porta (opcional)"
 
 [node name="CriarJogoButton" type="Button" parent="CanvasLayer/Hud/JogosPanel/VBox/CriarRow"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_iniciar")
 theme_override_styles/hover = SubResource("StyleBoxFlat_iniciar_hover")
-text = "CRIAR"
+text = "ABRIR JOGO"
+
+[node name="CatalogoTitle" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7411765, 0.7882353, 0.8862745, 1)
+theme_override_font_sizes/font_size = 13
+text = "CATÁLOGO • ABRA UMA PORTA E JOGUE COM A TURMA"
+
+[node name="JogoStatus" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
+theme_override_font_sizes/font_size = 13
+text = "Escolha um jogo e abra a sua porta."
+autowrap_mode = 2
+
+[node name="CatalogoList" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PortasTitle" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7411765, 0.7882353, 0.8862745, 1)
+theme_override_font_sizes/font_size = 13
+text = "PORTAS ABERTAS NA SALA"
 
 [node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
 layout_mode = 2
@@ -402,14 +435,6 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
-
-[node name="JogoStatus" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
-theme_override_font_sizes/font_size = 14
-text = "Nenhum jogo criado ainda."
-autowrap_mode = 2
 
 [node name="SairJogoButton" type="Button" parent="CanvasLayer/Hud/JogosPanel/VBox"]
 unique_name_in_owner = true
@@ -451,7 +476,7 @@ anchors_preset = 9
 anchor_bottom = 1.0
 offset_left = 24.0
 offset_top = 24.0
-offset_right = 438.0
+offset_right = 540.0
 offset_bottom = -24.0
 grow_vertical = 2
 
@@ -484,17 +509,27 @@ autowrap_mode = 2
 [node name="Separator" type="HSeparator" parent="CanvasLayer/Dashboard/Panel/VBox"]
 layout_mode = 2
 
-[node name="PlayersHeader" type="HBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
+[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Conteudo" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="PlayersHeader" type="HBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
 layout_mode = 2
 
-[node name="PlayersTitle" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/PlayersHeader"]
+[node name="PlayersTitle" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo/PlayersHeader"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
 theme_override_font_sizes/font_size = 14
 text = "ALUNOS CONECTADOS"
 
-[node name="DashboardCount" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/PlayersHeader"]
+[node name="DashboardCount" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo/PlayersHeader"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7411765, 0.7882353, 0.8862745, 1)
@@ -502,18 +537,13 @@ theme_override_font_sizes/font_size = 14
 text = "0"
 horizontal_alignment = 2
 
-[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
-custom_minimum_size = Vector2(0, 180)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="DashboardPlayers" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll"]
+[node name="DashboardPlayers" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="DashboardEmpty" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+[node name="DashboardEmpty" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
@@ -522,26 +552,47 @@ text = "Nenhum aluno conectado ainda."
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="Separator2" type="HSeparator" parent="CanvasLayer/Dashboard/Panel/VBox"]
+[node name="Separator2" type="HSeparator" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
 layout_mode = 2
 
-[node name="JogosTitle" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+[node name="JogosTitle" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.70980394, 0.7607843, 0.8666667, 1)
 theme_override_font_sizes/font_size = 14
-text = "JOGOS CRIADOS PELOS ALUNOS"
+text = "PORTAS DE JOGO ABERTAS"
 
-[node name="DashboardJogos" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
+[node name="DashboardJogos" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="DashboardJogosEmpty" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox"]
+[node name="DashboardJogosEmpty" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
 theme_override_font_sizes/font_size = 15
-text = "Nenhum jogo aberto pelos alunos."
+text = "Nenhuma porta aberta."
+autowrap_mode = 2
+
+[node name="CatalogoTitle" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.70980394, 0.7607843, 0.8666667, 1)
+theme_override_font_sizes/font_size = 14
+text = "JOGOS DISPONÍVEIS NO HUB"
+
+[node name="DashboardCatalogo" type="VBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="DashboardResumo" type="Label" parent="CanvasLayer/Dashboard/Panel/VBox/Scroll/Conteudo"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
+theme_override_font_sizes/font_size = 13
+text = "0 portas • 0 jogadores em partidas"
 autowrap_mode = 2
 
 [node name="Buttons" type="HBoxContainer" parent="CanvasLayer/Dashboard/Panel/VBox"]
@@ -662,3 +713,9 @@ autowrap_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "VOLTAR AO MENU"
+
+[node name="GameLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="GameOverlay" parent="GameLayer" instance=ExtResource("4_overlay")]
+unique_name_in_owner = true

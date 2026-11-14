@@ -20,6 +20,15 @@ public partial class Personagem : Node2D
 	/// </summary>
 	[Export] public bool Controllable { get; set; } = true;
 
+	/// <summary>
+	/// No lobby a visão é de mapa inteiro (uma câmera só para todos), então
+	/// o personagem não liga a câmera própria.
+	/// </summary>
+	[Export] public bool UserCamera { get; set; } = true;
+
+	/// <summary>Trava o teclado enquanto o jogador está dentro de um minigame.</summary>
+	[Export] public bool InputLocked { get; set; } = false;
+
 	[Export] public Vector2 SyncDirection { get; set; } = Vector2.Zero;
 	[Export] public string SyncAnimation { get; set; } = "idleDown";
 	[Export] public string PlayerName { get; set; } = "Jogador";
@@ -51,7 +60,8 @@ public partial class Personagem : Node2D
 		// Só a máquina dona do personagem liga a câmera. Assim várias câmeras
 		// não brigam pela tela quando há mais de um jogador conectado.
 		// O preview (Controllable = false) nunca tem câmera nem movimento.
-		_camera.Enabled = IsMultiplayerAuthority() && Controllable;
+		// No lobby (UserCamera = false) a câmera é a de mapa inteiro.
+		_camera.Enabled = IsMultiplayerAuthority() && Controllable && UserCamera;
 
 		if (IsMultiplayerAuthority() && _session != null)
 		{
@@ -86,7 +96,7 @@ public partial class Personagem : Node2D
 		// Portanto, só movemos o personagem quando somos a autoridade dele.
 		if (IsMultiplayerAuthority() && Controllable)
 		{
-			Vector2 direction = ReadMovementInput();
+			Vector2 direction = InputLocked ? Vector2.Zero : ReadMovementInput();
 			SyncDirection = direction;
 
 			if (direction != Vector2.Zero)

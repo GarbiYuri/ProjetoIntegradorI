@@ -238,6 +238,15 @@ theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_destaque")
 text = "JOGAR"
 
+[node name="SemContaButton" type="Button" parent="MarginContainer/CenterContainer/PanelContainer/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 18
+text = "JOGAR SEM CONTA"
+tooltip_text = "Entra como convidado, sem criar conta. Você abre uma porta ao entrar no jogo."
+
 [node name="VoltarButton" type="Button" parent="MarginContainer/CenterContainer/PanelContainer/VBox/Buttons"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 0)

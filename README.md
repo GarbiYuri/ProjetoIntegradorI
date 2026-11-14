@@ -27,23 +27,27 @@ O projeto é dividido em:
    professor (nome da sala, professor e IP vindos do broadcast UDP) e a
    **lista de alunos que já estão na sala** (atualizada ao vivo) → **tela de
    conta** (cria a conta ou acessa, escolhe a cor do personagem) → **JOGAR**
-   entra direto no lobby como cliente (o lobby já está aberto, então entra na
-   hora).
+   entra direto no lobby como cliente. Quem não quer criar conta usa
+   **JOGAR SEM CONTA** e entra como convidado (sem banco).
 3. **Lobby**: cena top-down com os personagens dos alunos sincronizados via
-   ENet (porta `7777`), cada um com a cor escolhida na tela de conta. O
-   professor **não aparece como personagem**: ele fica com o **painel de
-   gerenciamento**, que lista os alunos conectados, os jogos criados pelos
-   alunos, e permite **INICIAR JOGO** e **ENCERRAR CONEXÃO** (fecha a sessão
-   para todos).
-4. **INICIAR JOGO**: fecha o painel e todos (professor e alunos) ficam no
-   lobby — que é onde os minigames vão entrar (nó `World/Jogos`). O professor
-   pode voltar ao painel a qualquer momento pelo botão **PAINEL** do HUD.
-5. **Jogo online (conexão interna)**: **só o aluno cria jogo** — ele não cria
-   sala (lobby), isso é do professor. Dentro do lobby, o aluno abre uma
-   **conexão interna** (outro servidor ENet, porta `7778`+) com o botão
-   **CRIAR** do painel **JOGOS ONLINE**; os colegas da sala veem o jogo na
-   lista e entram com **ENTRAR**. O professor acompanha e pode **ENCERRAR**
-   esses jogos pelo painel dele.
+   ENet (porta `7777`), cada um com a cor escolhida na tela de conta. A visão é
+   de **mapa inteiro** (sem o zoom do personagem) e o HUD é compacto: sala,
+   status, contador de jogadores e o botão **🎮 JOGOS**. O professor **não
+   aparece como personagem**: ele fica com o **painel de gerenciamento**, que
+   lista os alunos conectados e as **portas de jogo abertas** (com quantidade
+   de jogadores e placar ao vivo), abre jogos do catálogo e permite
+   **INICIAR JOGO** e **ENCERRAR CONEXÃO**.
+4. **Ciclo de jogos**: todo mundo pode jogar. O jogador abre o painel
+   **🎮 JOGOS**, escolhe um jogo do **catálogo** e clica em **ABRIR PORTA** —
+   isso cria uma porta ENet própria da partida (porta `7778`+) e abre o jogo
+   em tela cheia sobre o lobby. Os colegas veem a porta na lista e entram com
+   **ENTRAR**; o dono vê o placar ao vivo e o professor acompanha tudo pelo
+   painel. Ao fechar (botão **FECHAR JOGO** ou `Esc`), todos voltam ao lobby.
+5. **Adicionar um jogo novo** é uma linha no catálogo
+   (`Game/Scripts/Games/GameRegistry.cs`) apontando para a cena. O jogo só
+   precisa herdar de `MinigameBase`; o lobby, o painel do professor e as portas
+   passam a mostrá-lo automaticamente. Veja
+   [`Documentation/Games.md`](Documentation/Games.md).
 
 ## Como executar
 
@@ -87,31 +91,47 @@ godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-join=127.0.0.1
 ```
 
+### Testar o catálogo e o ciclo de jogos
+
+O atalho `--lobby-jogos` abre o painel **🎮 JOGOS** do aluno e
+`--lobby-criar-jogo` abre a primeira porta do catálogo:
+
+```bash
+# Abre o lobby sozinho e o catálogo
+godot --path HackoonGameHub/Game \
+  res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-solo --lobby-jogos
+
+# Abre o lobby sozinho e já abre uma porta do jogo
+godot --path HackoonGameHub/Game \
+  res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-solo --lobby-criar-jogo=2
+```
+
 ### Testar o botão INICIAR JOGO
 
 O atalho `--lobby-iniciar` dispara o mesmo botão do painel do professor
-(o RPC que fecha o painel e leva todos para o lobby). Use `--lobby-iniciar=3`
-para esperar 3 segundos antes de disparar:
+(fecha o painel e leva todos para o lobby, de onde os jogos são abertos pelo
+catálogo). Use `--lobby-iniciar=3` para esperar 3 segundos antes de disparar:
 
 ```bash
 godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-host --lobby-iniciar=3
 ```
 
-### Testar o jogo online criado pelo aluno (conexão interna)
+### Testar uma partida entre dois alunos (porta de jogo)
 
-Em dois terminais:
+Em três terminais:
 
 ```bash
-# Terminal 1 (host) — e um cliente que cria o jogo
+# Terminal 1 (host/professor)
 godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-host
 
+# Terminal 2 (aluno que abre a porta)
 godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- \
   --lobby-join=127.0.0.1 --lobby-criar-jogo=3
 
-# Terminal 3 (outro aluno) — entra no jogo criado
+# Terminal 3 (outro aluno) — entra na partida aberta
 godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- \
   --lobby-join=127.0.0.1 --lobby-entrar-jogo=8
@@ -130,7 +150,9 @@ O personagem fica em `Scenes/Personagem/Personagem.tscn`.
 - A sombra é o nó `Shadow` e o nome é o `NameLabel`, ambos separados para
   facilitar a troca de arte.
 
-## Documentação do lobby
+## Documentação
 
-Consulte [`Documentation/Lobby.md`](Documentation/Lobby.md) para o detalhamento
-técnico do ciclo fechado, o que foi corrigido e as próximas etapas.
+- [`Documentation/Lobby.md`](Documentation/Lobby.md) — detalhamento técnico do
+  lobby, do ciclo fechado e do que foi corrigido.
+- [`Documentation/Games.md`](Documentation/Games.md) — contrato dos minigames e
+  passo a passo para adicionar um jogo novo ao catálogo.
