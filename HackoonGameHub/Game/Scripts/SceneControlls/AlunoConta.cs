@@ -37,6 +37,7 @@ public partial class AlunoConta : Control
 	private HBoxContainer _swatches;
 	private Label _erroLabel;
 	private Button _jogarButton;
+	private Button _semContaButton;
 	private Button _voltarButton;
 
 	private Personagem _preview;
@@ -66,6 +67,7 @@ public partial class AlunoConta : Control
 		_swatches = GetNode<HBoxContainer>("%Swatches");
 		_erroLabel = GetNode<Label>("%ErroLabel");
 		_jogarButton = GetNode<Button>("%JogarButton");
+		_semContaButton = GetNode<Button>("%SemContaButton");
 		_voltarButton = GetNode<Button>("%VoltarButton");
 
 		_preview = GetNode<Personagem>("MarginContainer/CenterContainer/PanelContainer/VBox/CharacterRow/PreviewPanel/PreviewVBox/PreviewHolder/PreviewPersonagem");
@@ -80,6 +82,7 @@ public partial class AlunoConta : Control
 		_nickEdit.TextChanged += OnNickAlterado;
 		_nickAcessarEdit.TextChanged += OnNickAlterado;
 		_jogarButton.Pressed += OnJogarPressed;
+		_semContaButton.Pressed += OnJogarSemContaPressed;
 		_voltarButton.Pressed += OnVoltarPressed;
 
 		ConstruirPaleta();
@@ -211,6 +214,39 @@ public partial class AlunoConta : Control
 			{
 				_jogarButton.Disabled = false;
 			}
+		}
+	}
+
+	/// <summary>
+	/// Entra como convidado: não cria conta, não usa o banco e não anuncia
+	/// persona. O apelido é opcional; a cor escolhida continua valendo.
+	/// </summary>
+	private void OnJogarSemContaPressed()
+	{
+		string apelido = (_modoCriar ? _nickEdit.Text : _nickAcessarEdit.Text).Trim();
+
+		if (string.IsNullOrWhiteSpace(apelido))
+		{
+			apelido = $"Convidado {GD.RandRange(10, 99)}";
+		}
+
+		_session.playerName = apelido;
+		_session.playerNick = apelido;
+		_session.personagemColorHex = _corEscolhida.ToHtml(false);
+		_session.lobbyMode = LobbyMode.Client;
+
+		if (string.IsNullOrWhiteSpace(_session.lobbyIp))
+		{
+			_session.lobbyIp = "127.0.0.1";
+		}
+
+		GD.Print($"[ALUNO] Entrando sem conta como \"{apelido}\".");
+
+		Error resultado = GetTree().ChangeSceneToFile("res://Scenes/Personagem/LobbyPrincipal.tscn");
+
+		if (resultado != Error.Ok)
+		{
+			MostrarErro("Não foi possível abrir o lobby: " + resultado);
 		}
 	}
 

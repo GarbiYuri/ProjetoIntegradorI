@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://cx5lr5r2ryun1"]
+
+[ext_resource type="Script" uid="uid://cqyaoddoq403m" path="res://InicialSilabas.cs" id="1_hxtka"]
+
+[node name="MenuManager" type="Control" unique_id=1837341015 node_paths=PackedStringArray("TitleLabel", "MainMenuContainer", "ThemeMenuContainer", "PlayButton", "ExitButton", "BtnGeral", "BtnAnimais", "BtnAlimentos", "BtnCiencia")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hxtka")
+TitleLabel = NodePath("VBoxContainer3/TitleLabel")
+MainMenuContainer = NodePath("VBoxContainer3/VBoxContainer")
+ThemeMenuContainer = NodePath("VBoxContainer3/VBoxContainer2")
+PlayButton = NodePath("VBoxContainer3/VBoxContainer/PlayButton")
+ExitButton = NodePath("VBoxContainer3/VBoxContainer/ExitButton")
+BtnGeral = NodePath("VBoxContainer3/VBoxContainer2/BtnGeral")
+BtnAnimais = NodePath("VBoxContainer3/VBoxContainer2/BtnAnimais")
+BtnAlimentos = NodePath("VBoxContainer3/VBoxContainer2/BtnAlimentos")
+BtnCiencia = NodePath("VBoxContainer3/VBoxContainer2/BtnCiencia")
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="." unique_id=411566238]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer3" unique_id=1410803483]
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+text = "JOGO DE SILABAS - AMS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer3" unique_id=2039660496]
+layout_mode = 2
+
+[node name="BtnGeral" type="Button" parent="VBoxContainer3/VBoxContainer2" unique_id=915896043]
+layout_mode = 2
+text = "
+"
+
+[node name="BtnAnimais" type="Button" parent="VBoxContainer3/VBoxContainer2" unique_id=1652076334]
+layout_mode = 2
+
+[node name="BtnAlimentos" type="Button" parent="VBoxContainer3/VBoxContainer2" unique_id=963762927]
+layout_mode = 2
+
+[node name="BtnCiencia" type="Button" parent="VBoxContainer3/VBoxContainer2" unique_id=942311342]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer3" unique_id=34718907]
+layout_mode = 2
+alignment = 1
+
+[node name="PlayButton" type="Button" parent="VBoxContainer3/VBoxContainer" unique_id=1077394630]
+layout_mode = 2
+text = "JOGAR"
+
+[node name="Sprite2D" type="Sprite2D" parent="VBoxContainer3/VBoxContainer/PlayButton" unique_id=1735600729]
+
+[node name="ExitButton" type="Button" parent="VBoxContainer3/VBoxContainer" unique_id=1729412109]
+layout_mode = 2
+text = "SAIR"

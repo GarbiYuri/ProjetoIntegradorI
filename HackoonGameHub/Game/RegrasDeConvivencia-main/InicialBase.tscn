@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://x5gxcb5h1wrt"]
+
+[ext_resource type="Script" uid="uid://cqyaoddoq403m" path="res://InicialSilabas.cs" id="1_p2bdr"]
+[ext_resource type="Texture2D" uid="uid://b6jffnb6fhu5c" path="res://menu.png" id="1_wa0ca"]
+[ext_resource type="FontFile" uid="uid://cymhq3yoj7mw0" path="res://Fonts/pixel_operator/PixelOperatorSC-Bold.ttf" id="2_p2bdr"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p2bdr"]
+atlas = ExtResource("1_wa0ca")
+region = Rect2(0, 24, 12, 12)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hdume"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_p2bdr")
+texture_margin_left = 3.0
+texture_margin_top = 4.0
+texture_margin_right = 3.0
+texture_margin_bottom = 4.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q0ko6"]
+atlas = ExtResource("1_wa0ca")
+region = Rect2(36, 24, 12, 12)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ryryw"]
+content_margin_top = 4.0
+content_margin_bottom = 8.0
+texture = SubResource("AtlasTexture_q0ko6")
+texture_margin_left = 3.0
+texture_margin_top = 2.0
+texture_margin_right = 3.0
+texture_margin_bottom = 4.0
+
+[node name="InicialSilabas" type="Control" unique_id=352558733 node_paths=PackedStringArray("MainMenuContainer", "PlayButton", "ExitButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_p2bdr")
+MainMenuContainer = NodePath("MarginContainer/CenterContainer/VBoxContainer/PanelContainer")
+PlayButton = NodePath("MarginContainer/CenterContainer/VBoxContainer/PanelContainer/VBoxContainer/PlayButton")
+ExitButton = NodePath("MarginContainer/CenterContainer/VBoxContainer/PanelContainer/VBoxContainer/ExitButton")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1101647953]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 640
+theme_override_constants/margin_top = 120
+theme_override_constants/margin_right = 640
+theme_override_constants/margin_bottom = 120
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer" unique_id=2082754921]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/CenterContainer" unique_id=1119373740]
+layout_mode = 2
+theme_override_constants/separation = 26
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/CenterContainer/VBoxContainer" unique_id=70059687]
+layout_mode = 2
+theme_override_constants/line_spacing = 6
+theme_override_fonts/font = ExtResource("2_p2bdr")
+theme_override_font_sizes/font_size = 100
+text = "REGRAS-DE-CONVIVÊNCIA"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/CenterContainer/VBoxContainer" unique_id=1814316229]
+texture_filter = 1
+custom_minimum_size = Vector2(640, 98)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_hdume")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/CenterContainer/VBoxContainer/PanelContainer" unique_id=1253811354]
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="MarginContainer/CenterContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=624637311]
+texture_filter = 1
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_p2bdr")
+theme_override_font_sizes/font_size = 56
+theme_override_styles/normal = SubResource("StyleBoxTexture_ryryw")
+text = "JOGAR"
+
+[node name="ExitButton" type="Button" parent="MarginContainer/CenterContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=130447828]
+texture_filter = 1
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_p2bdr")
+theme_override_font_sizes/font_size = 56
+theme_override_styles/normal = SubResource("StyleBoxTexture_ryryw")
+text = "SAIR"

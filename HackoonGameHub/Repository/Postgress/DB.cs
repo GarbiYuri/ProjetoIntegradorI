@@ -533,18 +533,26 @@ public class DB
             created_at timestamp
         );
 
-        -- Tabela de Jogos (conexões internas criadas pelos alunos dentro do lobby)
+        -- Tabela de Jogos (portas de jogo abertas dentro do lobby)
         CREATE TABLE IF NOT EXISTS jogos (
             id SERIAL primary key,
             name varchar(255) not null,
+            game_key varchar(64) DEFAULT 'custom',
             id_sala INTEGER references salas(id) on delete set null,
             id_aluno INTEGER references alunos(id) on delete set null,
             creator varchar(255),
             host_ip varchar(255),
             port INTEGER DEFAULT 7778,
             status varchar(32) DEFAULT 'ABERTO',
+            players INTEGER DEFAULT 1,
+            score text,
             created_at timestamp
         );
+
+        -- Bancos já existentes: acrescenta as colunas novas sem perder dados.
+        ALTER TABLE jogos ADD COLUMN IF NOT EXISTS game_key varchar(64) DEFAULT 'custom';
+        ALTER TABLE jogos ADD COLUMN IF NOT EXISTS players INTEGER DEFAULT 1;
+        ALTER TABLE jogos ADD COLUMN IF NOT EXISTS score text;
     ");
 
         await cmd.ExecuteNonQueryAsync();
