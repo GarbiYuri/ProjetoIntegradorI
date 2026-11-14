@@ -31,22 +31,23 @@ O projeto é dividido em:
    **JOGAR SEM CONTA** e entra como convidado (sem banco).
 3. **Lobby**: cena top-down com os personagens dos alunos sincronizados via
    ENet (porta `7777`), cada um com a cor escolhida na tela de conta. A visão é
-   de **mapa inteiro** (sem o zoom do personagem) e o HUD é compacto: sala,
-   status, contador de jogadores e o botão **🎮 JOGOS**. O professor **não
-   aparece como personagem**: ele fica com o **painel de gerenciamento**, que
-   lista os alunos conectados e as **portas de jogo abertas** (com quantidade
-   de jogadores e placar ao vivo), abre jogos do catálogo e permite
+   de **mapa inteiro** (sem o zoom do personagem) e o HUD do aluno é mínimo:
+   sala, status, contador de online e **SAIR**. Segure **Tab** para ver a lista
+   de **alunos online** (nome, nick e cor). O professor **não aparece como
+   personagem**: ele fica com o **painel de gerenciamento**, que lista os
+   alunos conectados e as **portas de jogo abertas** (com quantidade de
+   jogadores e placar ao vivo), abre jogos do catálogo e permite
    **INICIAR JOGO** e **ENCERRAR CONEXÃO**.
-4. **Ciclo de jogos**: todo mundo pode jogar. O jogador abre o painel
-   **🎮 JOGOS**, escolhe um jogo do **catálogo** e clica em **ABRIR PORTA** —
-   isso cria uma porta ENet própria da partida (porta `7778`+) e abre o jogo
-   em tela cheia sobre o lobby. Os colegas veem a porta na lista e entram com
-   **ENTRAR**; o dono vê o placar ao vivo e o professor acompanha tudo pelo
-   painel. Ao fechar (botão **FECHAR JOGO** ou `Esc`), todos voltam ao lobby.
+4. **Ciclo de jogos**: cada jogo do catálogo tem uma **casinha física no
+   lobby**. O aluno caminha até ela e aperta **E** (ou **Espaço**) para entrar.
+   Se ainda não houver partida, ele abre a porta ENet própria (porta `7778`+);
+   se já houver, entra na partida dos colegas. O jogo abre em tela cheia sobre
+   o lobby, com placar ao vivo no painel do professor. Ao fechar (botão
+   **FECHAR JOGO** ou `Esc`), todos voltam ao lobby.
 5. **Adicionar um jogo novo** é uma linha no catálogo
    (`Game/Scripts/Games/GameRegistry.cs`) apontando para a cena. O jogo só
-   precisa herdar de `MinigameBase`; o lobby, o painel do professor e as portas
-   passam a mostrá-lo automaticamente. Veja
+   precisa herdar de `MinigameBase`; a **casinha no lobby**, o painel do
+   professor e as portas passam a mostrá-lo automaticamente. Veja
    [`Documentation/Games.md`](Documentation/Games.md).
 
 ## Como executar
@@ -91,26 +92,32 @@ godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-join=127.0.0.1
 ```
 
-### Testar o catálogo e o ciclo de jogos
+### Testar a casinha, o HUD do Tab e o ciclo de jogos
 
-O atalho `--lobby-jogos` abre o painel **🎮 JOGOS** do aluno e
-`--lobby-criar-jogo` abre a primeira porta do catálogo:
+O atalho `--lobby-perto-casa` posiciona o aluno junto à casinha,
+`--lobby-casinha` entra nela (e abre a porta, se necessário),
+`--lobby-online` deixa o HUD de alunos online aberto e
+`--lobby-criar-jogo` abre a primeira porta diretamente (atalho antigo):
 
 ```bash
-# Abre o lobby sozinho e o catálogo
+# Lobby solo com o prompt da casinha
 godot --path HackoonGameHub/Game \
-  res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-solo --lobby-jogos
+  res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-solo --lobby-perto-casa
 
-# Abre o lobby sozinho e já abre uma porta do jogo
+# Lobby solo entrando na casinha do jogo
 godot --path HackoonGameHub/Game \
-  res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-solo --lobby-criar-jogo=2
+  res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-solo --lobby-casinha=2
+
+# Lobby solo com a lista de alunos online (Tab)
+godot --path HackoonGameHub/Game \
+  res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-solo --lobby-online
 ```
 
 ### Testar o botão INICIAR JOGO
 
 O atalho `--lobby-iniciar` dispara o mesmo botão do painel do professor
-(fecha o painel e leva todos para o lobby, de onde os jogos são abertos pelo
-catálogo). Use `--lobby-iniciar=3` para esperar 3 segundos antes de disparar:
+(fecha o painel e leva todos para o lobby, de onde os jogos são abertos pela
+casinha). Use `--lobby-iniciar=3` para esperar 3 segundos antes de disparar:
 
 ```bash
 godot --path HackoonGameHub/Game \
@@ -126,10 +133,10 @@ Em três terminais:
 godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-host
 
-# Terminal 2 (aluno que abre a porta)
+# Terminal 2 (aluno que entra na casinha e abre a porta)
 godot --path HackoonGameHub/Game \
   res://Scenes/Personagem/LobbyPrincipal.tscn -- \
-  --lobby-join=127.0.0.1 --lobby-criar-jogo=3
+  --lobby-join=127.0.0.1 --lobby-casinha=3
 
 # Terminal 3 (outro aluno) — entra na partida aberta
 godot --path HackoonGameHub/Game \

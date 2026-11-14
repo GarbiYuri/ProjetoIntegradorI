@@ -10,8 +10,9 @@ namespace Game.Scripts.Games;
 /// Catálogo central de jogos do Hackoon Game Hub.
 ///
 /// Adicionar um jogo é uma linha: registre o <see cref="GameInfo"/> apontando
-/// para a cena. O resto (cartões no lobby, painel do professor, portas e
-/// permissões) é automático.
+/// para a cena. O resto (casinha física no lobby, painel do professor, portas
+/// e permissões) é automático. A casinha pode receber uma posição fixa em
+/// <see cref="GameInfo.PosicaoNoLobby"/> ou usar a distribuição automática.
 ///
 /// Regras para a cena do jogo:
 /// - o nó raiz deve ter um script que herde de <see cref="MinigameBase"/>;

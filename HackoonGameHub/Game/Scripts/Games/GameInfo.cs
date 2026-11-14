@@ -8,8 +8,8 @@ namespace Game.Scripts.Games;
 ///
 /// Para adicionar um jogo novo, basta criar a cena dele (com um script que
 /// herde de <see cref="MinigameBase"/>) e registrar um <see cref="GameInfo"/>
-/// em <see cref="GameRegistry"/>. O catálogo do lobby, o painel do professor
-/// e a lista de portas abertas passam a mostrar o jogo automaticamente.
+/// em <see cref="GameRegistry"/>. A casinha no lobby, o painel do professor e
+/// a lista de portas abertas passam a mostrar o jogo automaticamente.
 /// </summary>
 public sealed class GameInfo
 {
@@ -36,9 +36,15 @@ public sealed class GameInfo
     /// <summary>Emblema curto mostrado no cartão (texto/emoji).</summary>
     public string Emblema { get; }
 
+    /// <summary>
+    /// Posição da casinha do jogo no lobby. Quando não informada, o lobby
+    /// distribui as casas automaticamente (esquerda/direita do salão).
+    /// </summary>
+    public Vector2? PosicaoNoLobby { get; }
+
     public GameInfo(string id, string nome, string descricao, string cena,
         string categoria = "Geral", int minJogadores = 1, int maxJogadores = 8,
-        Color? cor = null, string emblema = "★")
+        Color? cor = null, string emblema = "★", Vector2? posicaoNoLobby = null)
     {
         Id = id;
         Nome = nome;
@@ -49,5 +55,6 @@ public sealed class GameInfo
         MaxJogadores = maxJogadores;
         Cor = cor ?? new Color(0.949f, 0.765f, 0.302f);
         Emblema = emblema;
+        PosicaoNoLobby = posicaoNoLobby;
     }
 }

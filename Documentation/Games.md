@@ -6,8 +6,9 @@ passo a passo para **adicionar um jogo novo** sem mexer na lógica do lobby.
 ## 1. Visão geral do ciclo
 
 ```
-Aluno/Professor
-   │  abre o painel 🎮 JOGOS e escolhe um cartão do catálogo
+Aluno
+   │  caminha até a casinha do jogo e aperta E
+   │  (o professor pode abrir pelo painel de gerenciamento)
    ▼
 LobbyPrincipal.AbrirJogoDoCatalogo(GameInfo)
    │  1. cria um servidor ENet da partida (porta 7778+)
@@ -28,11 +29,11 @@ Peças principais:
 | Peça | Onde fica |
 | --- | --- |
 | Catálogo | `Game/Scripts/Games/GameRegistry.cs` |
-| Metadados | `Game/Scripts/Games/GameInfo.cs` |
+| Metadados e posição da casinha | `Game/Scripts/Games/GameInfo.cs` |
 | Contrato do jogo | `Game/Scripts/Games/MinigameBase.cs` |
 | Contexto entregue ao jogo | `Game/Scripts/Games/GameContexto.cs` |
 | Overlay / raiz da partida | `Game/Scripts/Games/GameOverlay.cs` e `Game/Scenes/Games/GameOverlay.tscn` |
-| Porta e ciclo no lobby | `Game/Scripts/Personagem/LobbyPrincipal.cs` |
+| Porta, casinhas e HUD Tab | `Game/Scripts/Personagem/LobbyPrincipal.cs` |
 | Jogo de referência | `Game/Games/RegrasDeConvivencia/` |
 
 ## 2. Contrato de um minigame
@@ -145,12 +146,21 @@ new GameInfo(
 
 Pronto. O jogo passa a aparecer automaticamente:
 
-- no **catálogo do aluno** (painel 🎮 JOGOS);
-- no **painel do professor** (JOGOS DISPONÍVEIS NO HUB);
-- nas **portas abertas** (nome, categoria, jogadores e placar).
+- como uma **casinha física no lobby** (com placa e interação por `E`);
+- no **painel do professor** (JOGOS DISPONÍVEIS NO HUB, botão **ABRIR**);
+- nas **portas abertas** do painel (nome, jogadores e placar).
 
-Se a cena não existir, o botão do cartão fica desabilitado e o lobby avisa no
-log — os outros jogos continuam funcionando.
+Por padrão a casinha recebe uma posição automática (esquerda/direita do salão e
+depois os cantos). Se quiser controlar o lugar, passe a posição no registro:
+
+```csharp
+new GameInfo(
+    // ...demais campos...
+    posicaoNoLobby: new Vector2(-400, 96)),
+```
+
+Se a cena não existir, a casinha e o botão ficam fora do lobby e o log avisa —
+os outros jogos continuam funcionando.
 
 ### Passo 3 — conteúdo e imagens
 
@@ -167,13 +177,17 @@ log — os outros jogos continuam funcionando.
 # A cena sozinha (não deve depender do lobby para abrir)
 godot --headless --path Game res://Games/MeuJogo/MeuJogo.tscn
 
-# Lobby solo com o catálogo aberto
+# Lobby solo posicionando o aluno junto à casinha
 godot --path Game res://Scenes/Personagem/LobbyPrincipal.tscn -- \
-  --lobby-solo --lobby-jogos
+  --lobby-solo --lobby-perto-casa
 
-# Lobby solo abrindo a primeira porta do catálogo
+# Lobby solo entrando na primeira casinha (abre a porta)
 godot --path Game res://Scenes/Personagem/LobbyPrincipal.tscn -- \
-  --lobby-solo --lobby-criar-jogo=2
+  --lobby-solo --lobby-casinha=2
+
+# Mostra o HUD de alunos online (Tab)
+godot --path Game res://Scenes/Personagem/LobbyPrincipal.tscn -- \
+  --lobby-solo --lobby-online
 ```
 
 Para testar com mais jogadores, use host + clientes:
@@ -182,11 +196,11 @@ Para testar com mais jogadores, use host + clientes:
 # Terminal 1
 godot --path Game res://Scenes/Personagem/LobbyPrincipal.tscn -- --lobby-host
 
-# Terminal 2 (abre a porta)
+# Terminal 2 (entra na casinha e abre a porta)
 godot --path Game res://Scenes/Personagem/LobbyPrincipal.tscn -- \
-  --lobby-join=127.0.0.1 --lobby-criar-jogo=3
+  --lobby-join=127.0.0.1 --lobby-casinha=3
 
-# Terminal 3 (entra na partida)
+# Terminal 3 (entra na partida aberta)
 godot --path Game res://Scenes/Personagem/LobbyPrincipal.tscn -- \
   --lobby-join=127.0.0.1 --lobby-entrar-jogo=8
 ```
@@ -223,6 +237,8 @@ como referência; nesse caso ele fica fora da varredura do Godot (`.gdignore`).
 
 - Cada jogador pode abrir **uma porta por vez**; abrir outra substitui a
   anterior.
+- Se uma partida daquele jogo já estiver aberta, a casinha entra nela em vez de
+  criar uma segunda porta.
 - Quando o dono fecha o jogo (ou sai do lobby), a porta é encerrada e todos os
   participantes voltam ao lobby.
 - O professor pode encerrar qualquer porta pelo painel.
@@ -232,7 +248,8 @@ como referência; nesse caso ele fica fora da varredura do Godot (`.gdignore`).
 
 | Sintoma | Causa provável | Solução |
 | --- | --- | --- |
-| Cartão do jogo desabilitado | Cena não encontrada no caminho informado | Confira o `cena:` no `GameRegistry` e se o arquivo existe |
+| Casinha não aparece no lobby | Cena não encontrada no caminho informado | Confira o `cena:` no `GameRegistry` e se o arquivo existe |
+| `E` não entra na casinha | Personagem longe da porta ou jogo já aberto | Chegue até o anel amarelo; se o overlay estiver aberto, feche-o primeiro |
 | Imagem em branco no jogo | Imagem nova ainda não importada | Rode o Godot uma vez (editor/import) e commite os `.import` |
 | Cliente não recebe o estado | RPC fora da subárvore da porta | Use a API da partida (o jogo já está sob `GameSessionRoot`) |
 | Todos voltam ao lobby ao fechar | Comportamento esperado do dono da porta | Para sair só da partida, use **FECHAR JOGO** em um cliente |

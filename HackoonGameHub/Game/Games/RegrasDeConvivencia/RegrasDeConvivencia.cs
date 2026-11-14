@@ -279,12 +279,14 @@ public partial class RegrasDeConvivencia : MinigameBase
         _roundTimer?.Stop();
         _roundTimer?.Start();
 
-        Rpc(nameof(ReceberRodada), _rodadaAtual);
+        // O tempo restante também vai no RPC: o convidado liga o relógio
+        // local e enxerga o mesmo TEMPO do dono da porta.
+        Rpc(nameof(ReceberRodada), _rodadaAtual, TempoDaRodada);
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true,
         TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    private void ReceberRodada(int indice)
+    private void ReceberRodada(int indice, float tempoRestante = TempoDaRodada)
     {
         if (indice < 0 || indice >= _sequencia.Count)
         {
@@ -294,6 +296,15 @@ public partial class RegrasDeConvivencia : MinigameBase
         _rodadaAtual = indice;
         _minhaEscolha = null;
         _fase = Fase.Rodada;
+
+        // Quem entra na partida também precisa do contador. Só o host decide
+        // quando a rodada acaba; nos clientes o timer é apenas visual.
+        if (!_souHost && _roundTimer != null)
+        {
+            _roundTimer.Stop();
+            _roundTimer.WaitTime = Mathf.Clamp(tempoRestante, 0.1f, TempoDaRodada);
+            _roundTimer.Start();
+        }
 
         MostrarAtitude(indice);
 
@@ -518,6 +529,7 @@ public partial class RegrasDeConvivencia : MinigameBase
         _pontos.Clear();
         AdicionarTodos(_pontos, resultado.Pontos);
         _fase = Fase.Resultado;
+        _roundTimer?.Stop();
 
         if (_boa != null) _boa.Disabled = true;
         if (_ruim != null) _ruim.Disabled = true;
@@ -727,7 +739,8 @@ public partial class RegrasDeConvivencia : MinigameBase
             Nomes = new Dictionary<long, string>(_nomes),
             Pontos = new Dictionary<long, int>(_pontos),
             Responderam = _responderam.ToList(),
-            Fase = _fase.ToString()
+            Fase = _fase.ToString(),
+            TempoRestante = (float)(_roundTimer?.TimeLeft ?? TempoDaRodada)
         };
 
         RpcId(id, nameof(ReceberEstado), JsonSerializer.Serialize(estado));
@@ -786,7 +799,7 @@ public partial class RegrasDeConvivencia : MinigameBase
 
         if (_fase == Fase.Rodada && _rodadaAtual < _sequencia.Count)
         {
-            ReceberRodada(_rodadaAtual);
+            ReceberRodada(_rodadaAtual, estado.TempoRestante);
         }
         else if (_fase == Fase.Resultado && _rodadaAtual < _sequencia.Count)
         {
@@ -1379,6 +1392,7 @@ public partial class RegrasDeConvivencia : MinigameBase
         public Dictionary<long, int>? Pontos { get; set; }
         public List<long>? Responderam { get; set; }
         public string Fase { get; set; } = "Preparando";
+        public float TempoRestante { get; set; } = TempoDaRodada;
     }
 
     private sealed class LinhaPlacar

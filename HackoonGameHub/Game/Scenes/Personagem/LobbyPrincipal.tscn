@@ -301,146 +301,70 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("3_theme")
 
-[node name="RoomPanel" type="PanelContainer" parent="CanvasLayer/Hud"]
+[node name="Info" type="VBoxContainer" parent="CanvasLayer/Hud"]
 layout_mode = 1
-offset_left = 20.0
+offset_left = 26.0
 offset_top = 20.0
-offset_right = 360.0
-offset_bottom = 122.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+offset_right = 640.0
+offset_bottom = 118.0
+theme_override_constants/separation = 2
 
-[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Hud/RoomPanel"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="RoomLabel" type="Label" parent="CanvasLayer/Hud/RoomPanel/VBox"]
+[node name="RoomLabel" type="Label" parent="CanvasLayer/Hud/Info"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 24
 text = "Lobby"
-label_settings = SubResource("LabelSettings_room")
 
-[node name="StatusLabel" type="Label" parent="CanvasLayer/Hud/RoomPanel/VBox"]
+[node name="StatusLabel" type="Label" parent="CanvasLayer/Hud/Info"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 14
 text = "Aguardando conexão..."
-label_settings = SubResource("LabelSettings_status")
+autowrap_mode = 2
 
-[node name="PlayersPanel" type="PanelContainer" parent="CanvasLayer/Hud"]
+[node name="TopRight" type="HBoxContainer" parent="CanvasLayer/Hud"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -220.0
+offset_left = -430.0
 offset_top = 20.0
-offset_right = -20.0
-offset_bottom = 158.0
+offset_right = -26.0
+offset_bottom = 58.0
 grow_horizontal = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
-
-[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Hud/PlayersPanel"]
-layout_mode = 2
 theme_override_constants/separation = 8
+alignment = 2
 
-[node name="PlayersLabel" type="Label" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
+[node name="PlayersLabel" type="Label" parent="CanvasLayer/Hud/TopRight"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Jogadores: 0"
-horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.84705883, 0.8666667, 0.9137255, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 14
+text = "0 online"
+vertical_alignment = 1
 
-[node name="JogosButton" type="Button" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
+[node name="PainelButton" type="Button" parent="CanvasLayer/Hud/TopRight"]
 unique_name_in_owner = true
-layout_mode = 2
-text = "🎮 JOGOS"
-tooltip_text = "Abrir o catálogo e as portas de jogo"
-
-[node name="PainelButton" type="Button" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
-unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
 text = "PAINEL"
+tooltip_text = "Voltar ao painel do professor"
 
-[node name="LeaveButton" type="Button" parent="CanvasLayer/Hud/PlayersPanel/VBox"]
+[node name="LeaveButton" type="Button" parent="CanvasLayer/Hud/TopRight"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(74, 0)
 layout_mode = 2
-text = "SAIR DO LOBBY"
-
-[node name="JogosPanel" type="PanelContainer" parent="CanvasLayer/Hud"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-offset_left = 20.0
-offset_top = 140.0
-offset_right = 410.0
-offset_bottom = 620.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
-
-[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Titulo" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
-theme_override_font_sizes/font_size = 18
-text = "JOGOS DO HUB"
-
-[node name="CriarRow" type="HBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="JogoNomeEdit" type="LineEdit" parent="CanvasLayer/Hud/JogosPanel/VBox/CriarRow"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Nome da sua porta (opcional)"
-
-[node name="CriarJogoButton" type="Button" parent="CanvasLayer/Hud/JogosPanel/VBox/CriarRow"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_iniciar")
-theme_override_styles/hover = SubResource("StyleBoxFlat_iniciar_hover")
-text = "ABRIR JOGO"
-
-[node name="CatalogoTitle" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7411765, 0.7882353, 0.8862745, 1)
-theme_override_font_sizes/font_size = 13
-text = "CATÁLOGO • ABRA UMA PORTA E JOGUE COM A TURMA"
-
-[node name="JogoStatus" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6784314, 0.85882354, 0.7411765, 1)
-theme_override_font_sizes/font_size = 13
-text = "Escolha um jogo e abra a sua porta."
-autowrap_mode = 2
-
-[node name="CatalogoList" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="PortasTitle" type="Label" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7411765, 0.7882353, 0.8862745, 1)
-theme_override_font_sizes/font_size = 13
-text = "PORTAS ABERTAS NA SALA"
-
-[node name="Scroll" type="ScrollContainer" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="JogosList" type="VBoxContainer" parent="CanvasLayer/Hud/JogosPanel/VBox/Scroll"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 6
-
-[node name="SairJogoButton" type="Button" parent="CanvasLayer/Hud/JogosPanel/VBox"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-text = "SAIR DO JOGO"
+text = "SAIR"
+tooltip_text = "Sair do lobby"
 
 [node name="HintLabel" type="Label" parent="CanvasLayer/Hud"]
 unique_name_in_owner = true
@@ -450,14 +374,43 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -54.0
+offset_top = -46.0
 offset_right = -20.0
-offset_bottom = -20.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 0
-text = "Use WASD ou as setas para se movimentar."
-label_settings = SubResource("LabelSettings_hint")
+theme_override_colors/font_color = Color(0.84705883, 0.8666667, 0.9137255, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 14
+text = "WASD para andar  •  Tab: alunos online"
 horizontal_alignment = 1
+
+[node name="InteractPrompt" type="PanelContainer" parent="CanvasLayer/Hud"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -116.0
+offset_right = 300.0
+offset_bottom = -62.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="InteractLabel" type="Label" parent="CanvasLayer/Hud/InteractPrompt"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 17
+text = "Pressione E para entrar"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Dashboard" type="Control" parent="CanvasLayer"]
 unique_name_in_owner = true
@@ -623,6 +576,84 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 text = "SAIR"
+
+[node name="OnlineLayer" type="CanvasLayer" parent="."]
+layer = 50
+
+[node name="OnlineOverlay" type="Control" parent="OnlineLayer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("3_theme")
+
+[node name="Dim" type="ColorRect" parent="OnlineLayer/OnlineOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.023529412, 0.03137255, 0.047058824, 0.68)
+
+[node name="Center" type="CenterContainer" parent="OnlineLayer/OnlineOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="OnlineLayer/OnlineOverlay/Center"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
+
+[node name="VBox" type="VBoxContainer" parent="OnlineLayer/OnlineOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="OnlineLayer/OnlineOverlay/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="OnlineTitle" type="Label" parent="OnlineLayer/OnlineOverlay/Center/Panel/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
+theme_override_font_sizes/font_size = 24
+text = "ALUNOS ONLINE"
+
+[node name="OnlineHint" type="Label" parent="OnlineLayer/OnlineOverlay/Center/Panel/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56078434, 0.6117647, 0.7176471, 1)
+theme_override_font_sizes/font_size = 13
+text = "Solte Tab para fechar"
+vertical_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="OnlineLayer/OnlineOverlay/Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="OnlineLayer/OnlineOverlay/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 330)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="OnlineList" type="VBoxContainer" parent="OnlineLayer/OnlineOverlay/Center/Panel/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
 [node name="StartOverlay" type="Control" parent="CanvasLayer"]
 unique_name_in_owner = true

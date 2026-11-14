@@ -45,9 +45,17 @@ O que faltava para o ciclo fechar:
 
 ### 2.1 Lobby jogável
 
-Prévia do lobby em modo solo (visão de mapa inteiro):
+Prévia do lobby em modo solo (visão de mapa inteiro), com a casinha do jogo:
 
 ![Lobby em modo solo](Imagens/LobbyMapaInteiro.png)
+
+Chegando perto da casinha, o prompt de interação aparece:
+
+![Prompt da casinha](Imagens/LobbyCasinhaPrompt.png)
+
+HUD de alunos online (segure `Tab`):
+
+![Alunos online](Imagens/LobbyAlunosOnline.png)
 
 Tela de entrada (solo, hospedar ou entrar por IP):
 
@@ -62,9 +70,14 @@ Cena: `Game/Scenes/Personagem/LobbyPrincipal.tscn`
   - **JOGAR SOZINHO** — modo offline para testar a arte e a movimentação.
   - **HOSPEDAR SALA** — abre um servidor ENet na porta `7777`.
   - **ENTRAR EM SALA** — conecta no IP informado (IP do professor).
-- HUD compacto com nome da sala, status da conexão, contador de jogadores, o
-  botão **🎮 JOGOS** (catálogo) e botão de sair. No modo solo o catálogo também
-  fica disponível.
+- HUD mínimo, sem painéis de entrada: nome da sala, status discreto, contador
+  de alunos online e botão **SAIR**. O professor mantém o botão **PAINEL** para
+  voltar ao dashboard.
+- **Casinha física**: cada jogo do catálogo ganha uma casinha no salão. O aluno
+  caminha até ela e aperta `E` (ou `Espaço`) para entrar. Se ninguém abriu a
+  partida ainda, ele abre a porta e os colegas entram na mesma casinha.
+- **HUD de alunos online**: segure `Tab` para ver nome, nick e cor de todos os
+  alunos conectados (funciona para aluno e professor).
 - **Câmera única de mapa inteiro** (`HostCamera`), sem o zoom do personagem:
   o aluno vê a sala inteira e o personagem não liga a câmera própria
   (`Personagem.UserCamera = false`). O enquadramento se ajusta ao tamanho da
@@ -148,18 +161,18 @@ Personagem (Node2D)
 
 Regra do projeto: **quem cria sala (lobby) é o professor**. Dentro da sala,
 **qualquer jogador** (inclusive convidado sem conta) pode abrir uma **porta de
-jogo** para um jogo do catálogo.
+jogo** caminhando até a casinha do jogo no salão.
 
 **Catálogo e entrada sem conta:**
 
 - A tela de conta (`AlunoConta`) ganhou **JOGAR SEM CONTA**: o convidado não
   cria registro no banco, não anuncia persona e entra direto no lobby usando o
-  IP da sessão descoberta pelo professor. Para abrir uma porta ele usa o mesmo
-  catálogo dos colegas.
+  IP da sessão descoberta pelo professor. Para jogar, ele usa a mesma casinha
+  dos colegas.
 - O catálogo fica em `Game/Scripts/Games/GameRegistry.cs`. Cada jogo é um
-  `GameInfo` (id, nome, descrição, cena, categoria, jogadores, cor, emblema).
-  Os cartões do catálogo do aluno e do painel do professor são gerados a partir
-  dele.
+  `GameInfo` (id, nome, descrição, cena, categoria, jogadores, cor, emblema e,
+  opcionalmente, a posição da casinha no lobby). As casinhas do salão e os
+  cartões do painel do professor são gerados a partir dele.
 
 **Lista de alunos da sala (visível para os alunos):**
 
@@ -180,22 +193,26 @@ jogo** para um jogo do catálogo.
 
 **Porta de jogo (partida):**
 
-- **ABRIR PORTA** no catálogo sobe um **servidor ENet próprio da partida**
-  (porta `7778`+) em uma **API de multiplayer separada**, aplicada apenas à
-  raiz do overlay (`GameSessionRoot`) — a conexão do lobby continua intacta.
+- Entrar na casinha (ou **ABRIR** no painel do professor) sobe um **servidor
+  ENet próprio da partida** (porta `7778`+) em uma **API de multiplayer
+  separada**, aplicada apenas à raiz do overlay (`GameSessionRoot`) — a conexão
+  do lobby continua intacta.
 - O jogo abre em **tela cheia sobre o lobby** (`GameOverlay`), com barra
   superior (jogo, porta, dono) e saída pelo botão **FECHAR JOGO** ou `Esc`.
   Enquanto o jogo está aberto o personagem fica travado (`InputLocked`).
 - O servidor do lobby recebe o pedido por RPC (`RequisitarJogo`), registra a
   porta (tabela `jogos`) e **divulga a lista** para todos; quem entra depois
   recebe a lista ao se conectar.
-- Os colegas veem a porta na lista e entram com **ENTRAR** (conexão separada,
-  sem sair do lobby). O dono pode **FECHAR**; o professor pode **ENCERRAR**
-  pelo painel dele.
+- Se já existe uma partida aberta daquele jogo, a casinha **entra nela** em vez
+  de criar outra. Assim os alunos se encontram naturalmente no mesmo jogo. O
+  dono pode fechar pelo **FECHAR JOGO**; o professor pode **ENCERRAR** pelo
+  painel dele.
 - O dono da porta publica no painel do professor a quantidade de jogadores e o
   **placar ao vivo**; ao final, o resumo da partida aparece no cartão da porta.
-- Atalhos de desenvolvimento: `--lobby-jogos[=SEGUNDOS]`,
-  `--lobby-criar-jogo[=SEGUNDOS]` e `--lobby-entrar-jogo[=SEGUNDOS]`.
+- Atalhos de desenvolvimento: `--lobby-online[=SEGUNDOS]` (alias antigo
+  `--lobby-jogos`), `--lobby-perto-casa[=SEGUNDOS]`,
+  `--lobby-casinha[=SEGUNDOS]`, `--lobby-criar-jogo[=SEGUNDOS]` e
+  `--lobby-entrar-jogo[=SEGUNDOS]`.
 
 ### 2.5.3 Lobby sempre aberto + botão INICIAR JOGO
 
@@ -222,6 +239,46 @@ conectando e reconectando sem nunca ver o lobby.
     (visível só na máquina dele).
 - Atalho de desenvolvimento: `--lobby-host --lobby-iniciar[=SEGUNDOS]`
   dispara o mesmo botão por linha de comando.
+
+### 2.5.4 Casinha, HUD de alunos online e tempo sincronizado
+
+**Entrada pelos jogos sem painéis:**
+
+- O HUD do aluno perdeu os painéis **🎮 JOGOS**, lista de portas e cartões de
+  catálogo. Sobraram apenas nome da sala, status, contador de online, dica de
+  controles e o botão **SAIR**.
+- Cada jogo registrado em `GameRegistry` ganha uma **casinha desenhada no
+  próprio cenário** (`World/Jogos`), com telhado na cor do jogo, porta,
+  janelas, placa e o texto **Pressione E para entrar**.
+- A posição pode ser definida no `GameInfo` (`posicaoNoLobby: new Vector2(...)`)
+  ou fica automática: esquerda/direita do salão, depois cantos superiores.
+  Com isso, adicionar um jogo novo continua sendo só uma entrada no registro.
+- Ao chegar perto da porta, a casinha ganha um **anel de destaque** e aparece o
+  prompt central. `E` ou `Espaço` entra. Se não houver partida daquele jogo, o
+  aluno abre a porta; se houver, entra na partida existente.
+- O professor continua abrindo e encerrando portas pelo **painel de
+  gerenciamento**, que mantém o catálogo com o botão **ABRIR**.
+
+**HUD de alunos online (`Tab`):**
+
+- Segure `Tab` para abrir um overlay com **todos os alunos conectados**, com
+  bolinha na cor do personagem, nome, nick (`@nick`) e selo **VOCÊ** para o
+  jogador local.
+- A lista é montada a partir dos nós em `World/Players`, então funciona tanto
+  no cliente quanto no host/professor. Enquanto o overlay está aberto, ele se
+  atualiza a cada 0,4 s; ao soltar `Tab`, fecha.
+- O overlay não bloqueia o mouse (é só leitura) e respeita o jogo aberto
+  (enquanto o minigame está em tela cheia, `Tab` não aparece).
+
+**Tempo da rodada no cliente:**
+
+- Antes, o `Timer` da rodada só era iniciado no **host**. Quem entrava na
+  partida de outro aluno ficava sem contagem e via o tempo zerado.
+- Agora `ReceberRodada` leva também o **tempo restante**; o cliente inicia um
+  timer local apenas visual (quem decide o fim da rodada continua sendo o host).
+- Quem entra no meio da rodada recebe o `TempoRestante` no estado completo
+  (`ReceberEstado`), então o **TEMPO 15s** já aparece descontando corretamente.
+- Ao receber o resultado, o timer local é parado para não disparar depois.
 
 ### 2.6 Descoberta por UDP robusta (mesmo PC e rede local)
 
