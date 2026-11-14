@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://bj0kn7ymoxk0"]
+
+[ext_resource type="Texture2D" uid="uid://b6jffnb6fhu5c" path="res://menu.png" id="1_uubjt"]
+[ext_resource type="FontFile" uid="uid://cymhq3yoj7mw0" path="res://Fonts/pixel_operator/PixelOperatorSC-Bold.ttf" id="2_5yleq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5yleq"]
+atlas = ExtResource("1_uubjt")
+region = Rect2(12, 0, 12, 12)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ylpcl"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_5yleq")
+texture_margin_left = 3.0
+texture_margin_top = 4.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ylpcl"]
+atlas = ExtResource("1_uubjt")
+region = Rect2(0, 0, 12, 12)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cx167"]
+content_margin_top = 4.0
+content_margin_bottom = 8.0
+texture = SubResource("AtlasTexture_ylpcl")
+texture_margin_left = 3.0
+texture_margin_top = 2.0
+texture_margin_right = 3.0
+texture_margin_bottom = 4.0
+
+[sub_resource type="CSharpScript" id="CSharpScript_dolsu"]
+script/source = "@tool
+extends Button
+
+# Arraste sua spritesheet/imagem para cá no Inspetor
+@export var spritesheet: Texture2D:
+	set(valor):
+		spritesheet = valor
+		_atualizar_estilo()
+
+# Defina a posição da cor na spritesheet (X, Y, Largura, Altura)
+@export var regiao_atlas: Rect2:
+	set(valor):
+		regiao_atlas = valor
+		_atualizar_estilo()
+
+func _ready():
+	_atualizar_estilo()
+
+func _atualizar_estilo():
+	# Só avança se a imagem tiver sido inserida no Inspetor
+	if not spritesheet:
+		return
+		
+	# 1. Cria um StyleBoxTexture totalmente novo e isolado na memória
+	var novo_estilo = StyleBoxTexture.new()
+	
+	# 2. Cria uma AtlasTexture totalmente nova e isolada na memória
+	var nova_atlas = AtlasTexture.new()
+	nova_atlas.atlas = spritesheet
+	nova_atlas.region = regiao_atlas
+	
+	# 3. Coloca a Atlas dentro do StyleBox
+	novo_estilo.texture = nova_atlas
+	
+	# 4. Opcional: Se você usa margens de 9-patch (Border Width/Margins), 
+	# configure-as aqui para o botão não distorcer as bordas:
+	# novo_estilo.texture_margin_left = 4
+	# novo_estilo.texture_margin_right = 4
+	# novo_estilo.texture_margin_top = 4
+	# novo_estilo.texture_margin_bottom = 4
+	
+	# 5. Aplica o estilo modificado exclusivamente ao estado \"normal\" deste botão
+	add_theme_stylebox_override(\"normal\", novo_estilo)
+"
+
+[node name="Menu" type="Control" unique_id=94516244]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1305417493]
+texture_filter = 1
+custom_minimum_size = Vector2(640, 98)
+layout_mode = 0
+offset_right = 640.0
+offset_bottom = 67.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_ylpcl")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=1557942707]
+layout_mode = 2
+
+[node name="Button2" type="Button" parent="PanelContainer/VBoxContainer" unique_id=338412947]
+texture_filter = 1
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5yleq")
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_cx167")
+text = "Lorem Ipsum"
+script = SubResource("CSharpScript_dolsu")
+
+[node name="Button3" type="Button" parent="PanelContainer/VBoxContainer" unique_id=1466552385]
+texture_filter = 1
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5yleq")
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_cx167")
+text = "Lorem Ipsum"
+script = SubResource("CSharpScript_dolsu")
+theme_override_fonts/font = ExtResource("2_5yleq")
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_cx167")

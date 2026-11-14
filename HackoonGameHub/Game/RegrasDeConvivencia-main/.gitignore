@@ -1,0 +1,15 @@
+# Pastas temporárias do Godot e Editores
+.godot/
+.idea/
+.vs/
+.vscode/
+
+# Arquivos compilados do C#
+bin/
+obj/
+
+# Arquivos compactados e desnecessários
+imagens.zip
+
+# Outros
+*.csproj.user
