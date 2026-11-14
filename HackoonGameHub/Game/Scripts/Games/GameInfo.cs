@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using Godot;
 
 namespace Game.Scripts.Games;
@@ -37,6 +38,12 @@ public sealed class GameInfo
     public string Emblema { get; }
 
     /// <summary>
+    /// Placar máximo esperado em uma partida. Serve para calcular as estrelas
+    /// (desempenho relativo) sem cada jogo precisar repetir a regra.
+    /// </summary>
+    public int PontosMaximosPorPartida { get; }
+
+    /// <summary>
     /// Posição da casinha do jogo no lobby. Quando não informada, o lobby
     /// distribui as casas automaticamente (esquerda/direita do salão).
     /// </summary>
@@ -44,7 +51,8 @@ public sealed class GameInfo
 
     public GameInfo(string id, string nome, string descricao, string cena,
         string categoria = "Geral", int minJogadores = 1, int maxJogadores = 8,
-        Color? cor = null, string emblema = "★", Vector2? posicaoNoLobby = null)
+        Color? cor = null, string emblema = "★", Vector2? posicaoNoLobby = null,
+        int pontosMaximosPorPartida = 100)
     {
         Id = id;
         Nome = nome;
@@ -56,5 +64,6 @@ public sealed class GameInfo
         Cor = cor ?? new Color(0.949f, 0.765f, 0.302f);
         Emblema = emblema;
         PosicaoNoLobby = posicaoNoLobby;
+        PontosMaximosPorPartida = Math.Max(1, pontosMaximosPorPartida);
     }
 }

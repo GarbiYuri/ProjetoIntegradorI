@@ -151,7 +151,7 @@ public class AlunoDB
         DB.testConnection();
 
         await using var cmd = DB.dataSource.CreateCommand(
-            "SELECT id, username, name, created_at, id_sala,password, turma, points, level, xp, stars FROM alunos WHERE username = $1");
+            "SELECT id, username, name, created_at, id_sala,password, turma, points, level, xp, stars FROM alunos WHERE LOWER(username) = LOWER($1)");
         cmd.Parameters.AddWithValue(username);
         await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -181,7 +181,7 @@ public class AlunoDB
     {
         DB.testConnection();
 
-        await using var cmd = DB.dataSource.CreateCommand("SELECT id FROM alunos WHERE username = $1");
+        await using var cmd = DB.dataSource.CreateCommand("SELECT id FROM alunos WHERE LOWER(username) = LOWER($1)");
         cmd.Parameters.AddWithValue(username);
         await using var reader = await cmd.ExecuteReaderAsync();
         return reader.HasRows;
@@ -199,6 +199,26 @@ public class AlunoDB
 
         cmd.Parameters.AddWithValue(salaId);
         cmd.Parameters.AddWithValue(alunoId);
+
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>
+    /// Persiste os pontos, XP, nível e estrelas do aluno (placar da missão →
+    /// pontos → regras de XP/nível).
+    /// </summary>
+    public static async Task AtualizarProgresso(Aluno aluno)
+    {
+        DB.testConnection();
+
+        await using var cmd = DB.dataSource.CreateCommand(
+            "UPDATE alunos SET points = $1, xp = $2, level = $3, stars = $4 WHERE id = $5");
+
+        cmd.Parameters.AddWithValue(aluno.points);
+        cmd.Parameters.AddWithValue(aluno.xp);
+        cmd.Parameters.AddWithValue(aluno.level);
+        cmd.Parameters.AddWithValue(aluno.stars);
+        cmd.Parameters.AddWithValue(aluno.id);
 
         await cmd.ExecuteNonQueryAsync();
     }

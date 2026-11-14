@@ -5,6 +5,7 @@ using System.Text.Json;
 using Godot;
 using Game.Scripts;
 using Game.Scripts.Games;
+using Models;
 
 namespace Game.Games;
 
@@ -54,6 +55,8 @@ public partial class RegrasDeConvivencia : MinigameBase
     private int _porta;
     private string _nomeLocal = "Jogador";
     private bool _registrado;
+    private string _idPartida = string.Empty;
+    private bool _pontuacaoRegistrada;
 
     private readonly Dictionary<long, string> _nomes = new();
     private readonly Dictionary<long, int> _pontos = new();
@@ -211,6 +214,8 @@ public partial class RegrasDeConvivencia : MinigameBase
         _responderam.Clear();
         _minhaEscolha = null;
         _fase = Fase.Preparando;
+        _idPartida = Guid.NewGuid().ToString("N");
+        _pontuacaoRegistrada = false;
 
         foreach (long id in _nomes.Keys.ToList())
         {
@@ -228,18 +233,24 @@ public partial class RegrasDeConvivencia : MinigameBase
         Rpc(nameof(ReceberPartida),
             JsonSerializer.Serialize(_sequencia),
             JsonSerializer.Serialize(_nomes),
-            JsonSerializer.Serialize(_pontos));
+            JsonSerializer.Serialize(_pontos),
+            _idPartida);
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true,
         TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    private void ReceberPartida(string sequenciaJson, string nomesJson, string pontosJson)
+    private void ReceberPartida(string sequenciaJson, string nomesJson, string pontosJson,
+        string idPartida)
     {
         _sequencia = Desserializar<List<Atitude>>(sequenciaJson) ?? new List<Atitude>();
         _nomes.Clear();
         AdicionarTodos(_nomes, Desserializar<Dictionary<long, string>>(nomesJson));
         _pontos.Clear();
         AdicionarTodos(_pontos, Desserializar<Dictionary<long, int>>(pontosJson));
+        _idPartida = string.IsNullOrWhiteSpace(idPartida)
+            ? Guid.NewGuid().ToString("N")
+            : idPartida;
+        _pontuacaoRegistrada = false;
 
         _responderam.Clear();
         _minhaEscolha = null;
@@ -644,6 +655,51 @@ public partial class RegrasDeConvivencia : MinigameBase
 
         AvisarStatus("Partida encerrada. Placar disponível.");
         AvisarFim(string.Join(" • ", ranking.Select(l => $"{l.Nome}: {l.Pontos}")));
+        RegistrarPontuacaoFinal();
+    }
+
+    /// <summary>
+    /// Cada jogador salva o próprio placar no sistema de pontos. O host e os
+    /// convidados recebem o mesmo id de partida, mas a chave do banco inclui
+    /// o aluno, então cada conta registra sua pontuação uma única vez.
+    /// </summary>
+    private async void RegistrarPontuacaoFinal()
+    {
+        if (_pontuacaoRegistrada)
+        {
+            return;
+        }
+
+        _pontuacaoRegistrada = true;
+
+        long local = Multiplayer.GetUniqueId();
+        int meusPontos = _pontos.GetValueOrDefault(local);
+
+        try
+        {
+            ResultadoPontuacao? resultado = await RegistrarPontuacaoAsync(
+                meusPontos,
+                sufixoPartida: _idPartida,
+                detalhes: $"{PerguntasPorPartida} atitudes • {meusPontos} pontos");
+
+            if (resultado != null)
+            {
+                if (_fimResumo != null)
+                {
+                    _fimResumo.Text = $"Sua pontuação: {meusPontos} pts. {resultado.Mensagem}";
+                }
+
+                AvisarStatus("Partida encerrada! " + resultado.Mensagem);
+            }
+            else if (Contexto?.IdAluno > 0 && _fimResumo != null)
+            {
+                _fimResumo.Text = $"Sua pontuação: {meusPontos} pts. Não foi possível salvar agora.";
+            }
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr("[REGRAS] Falha ao registrar pontos: " + e.Message);
+        }
     }
 
     private void OnReiniciarPressed()
@@ -740,7 +796,8 @@ public partial class RegrasDeConvivencia : MinigameBase
             Pontos = new Dictionary<long, int>(_pontos),
             Responderam = _responderam.ToList(),
             Fase = _fase.ToString(),
-            TempoRestante = (float)(_roundTimer?.TimeLeft ?? TempoDaRodada)
+            TempoRestante = (float)(_roundTimer?.TimeLeft ?? TempoDaRodada),
+            PartidaId = _idPartida
         };
 
         RpcId(id, nameof(ReceberEstado), JsonSerializer.Serialize(estado));
@@ -789,6 +846,11 @@ public partial class RegrasDeConvivencia : MinigameBase
 
         _rodadaAtual = estado.Rodada;
 
+        if (!string.IsNullOrWhiteSpace(estado.PartidaId))
+        {
+            _idPartida = estado.PartidaId;
+        }
+
         if (Enum.TryParse(estado.Fase, out Fase fase))
         {
             _fase = fase;
@@ -815,6 +877,7 @@ public partial class RegrasDeConvivencia : MinigameBase
         else if (_fase == Fase.Fim)
         {
             MostrarFimComPontos();
+            RegistrarPontuacaoFinal();
         }
     }
 
@@ -1393,6 +1456,7 @@ public partial class RegrasDeConvivencia : MinigameBase
         public List<long>? Responderam { get; set; }
         public string Fase { get; set; } = "Preparando";
         public float TempoRestante { get; set; } = TempoDaRodada;
+        public string PartidaId { get; set; } = string.Empty;
     }
 
     private sealed class LinhaPlacar

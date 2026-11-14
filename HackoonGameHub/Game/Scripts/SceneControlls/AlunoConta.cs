@@ -316,6 +316,9 @@ public partial class AlunoConta : Control
 	{
 		GD.Print($"[ALUNO] Conta pronta: {aluno.name} (id {aluno.id}). Indo para o lobby.");
 
+		// Sem isso o lobby não sabe qual conta está jogando e o sistema de
+		// pontos não teria como salvar o placar no banco.
+		_session.usuario = aluno;
 		_session.playerName = aluno.name;
 		_session.playerNick = aluno.username ?? string.Empty;
 		_session.personagemColorHex = _corEscolhida.ToHtml(false);

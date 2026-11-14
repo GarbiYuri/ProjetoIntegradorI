@@ -30,6 +30,12 @@ public class Jogo
     /// <summary>Resumo do placar/resultado publicado pelo jogo.</summary>
     public string placar { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Identificador único da partida/porta. É compartilhado com os jogadores
+    /// que entram e usado pelo sistema de pontos (idempotência por aluno).
+    /// </summary>
+    public string partidaId { get; set; } = Guid.NewGuid().ToString("N");
+
     public DateTime createdAt { get; set; } = DateTime.Now;
 
     public Jogo()

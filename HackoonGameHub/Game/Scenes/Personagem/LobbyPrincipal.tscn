@@ -589,7 +589,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 0
 theme = ExtResource("3_theme")
 
 [node name="Dim" type="ColorRect" parent="OnlineLayer/OnlineOverlay"]
@@ -599,7 +599,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 0
 color = Color(0.023529412, 0.03137255, 0.047058824, 0.68)
 
 [node name="Center" type="CenterContainer" parent="OnlineLayer/OnlineOverlay"]
@@ -609,12 +609,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 1
 
 [node name="Panel" type="PanelContainer" parent="OnlineLayer/OnlineOverlay/Center"]
-custom_minimum_size = Vector2(560, 0)
+custom_minimum_size = Vector2(680, 0)
 layout_mode = 2
-mouse_filter = 2
+mouse_filter = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
 
 [node name="VBox" type="VBoxContainer" parent="OnlineLayer/OnlineOverlay/Center/Panel"]
@@ -630,8 +630,8 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.8862745, 0.5019608, 1)
-theme_override_font_sizes/font_size = 24
-text = "ALUNOS ONLINE"
+theme_override_font_sizes/font_size = 22
+text = "JOGOS E ALUNOS"
 
 [node name="OnlineHint" type="Label" parent="OnlineLayer/OnlineOverlay/Center/Panel/VBox/Header"]
 layout_mode = 2
@@ -644,7 +644,7 @@ vertical_alignment = 1
 layout_mode = 2
 
 [node name="Scroll" type="ScrollContainer" parent="OnlineLayer/OnlineOverlay/Center/Panel/VBox"]
-custom_minimum_size = Vector2(0, 330)
+custom_minimum_size = Vector2(0, 420)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
