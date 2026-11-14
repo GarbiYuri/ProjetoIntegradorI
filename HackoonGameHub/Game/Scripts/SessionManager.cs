@@ -22,6 +22,9 @@ public partial class SessionManager : Node
     public List<Usuario> usuariosNaRede { get; set; } = new List<Usuario>();
     public Sala sala { get; set; }
 
+    /// <summary>Aluno da conta local (nulo para professor/convidado).</summary>
+    public Aluno? aluno => usuario as Aluno;
+
     // Id da sala em que o aluno entrou (0 = ainda não entrou em sala nenhuma).
     // Vem no broadcast do professor e permite ligar a conta do aluno à sala.
     public int salaId { get; set; }

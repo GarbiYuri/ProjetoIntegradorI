@@ -36,7 +36,23 @@ public static class GameRegistry
             minJogadores: 1,
             maxJogadores: 10,
             cor: new Color(0.427f, 0.686f, 0.949f),
-            emblema: "⚖"),
+            emblema: "⚖",
+            pontosMaximosPorPartida: 50),
+
+        // -------------------------------------------------------------
+        // Missão Espacial (matemática: operações, meteors e boss)
+        // -------------------------------------------------------------
+        new GameInfo(
+            id: "missao-espacial",
+            nome: "Missão Espacial",
+            descricao: "Responda operações matemáticas e destrua os meteoros para concluir a missão.",
+            cena: "res://Games/MissaoEspacial/MissaoEspacial.tscn",
+            categoria: "Matemática",
+            minJogadores: 1,
+            maxJogadores: 4,
+            cor: new Color(0.561f, 0.427f, 0.922f),
+            emblema: "🌌",
+            pontosMaximosPorPartida: 100),
 
         // -------------------------------------------------------------
         // Próximo jogo: copie o bloco acima, troque os dados e crie a cena.

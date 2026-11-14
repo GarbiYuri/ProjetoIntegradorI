@@ -1,6 +1,9 @@
 #nullable enable
 using System;
+using System.Threading.Tasks;
 using Godot;
+using Models;
+using Service;
 
 namespace Game.Scripts.Games;
 
@@ -86,4 +89,48 @@ public abstract partial class MinigameBase : Control
 
     /// <summary>Se este nó é o dono da porta do jogo.</summary>
     protected bool SouServidor => Contexto?.SouHost == true || Multiplayer.IsServer();
+
+    /// <summary>
+    /// Registra o placar da partida no sistema de pontos.
+    ///
+    /// O jogo só precisa chamar este método uma vez por partida concluída:
+    /// o serviço valida, calcula as estrelas pelo máximo do jogo e o banco
+    /// garante idempotência pela chave (aluno, partida).
+    /// </summary>
+    protected Task<ResultadoPontuacao?> RegistrarPontuacaoAsync(
+        int pontos,
+        int? estrelas = null,
+        string? sufixoPartida = null,
+        string? detalhes = null)
+    {
+        GameContexto? contexto = Contexto;
+
+        if (contexto == null)
+        {
+            return Task.FromResult<ResultadoPontuacao?>(null);
+        }
+
+        string partidaId = contexto.PartidaId;
+
+        if (string.IsNullOrWhiteSpace(partidaId))
+        {
+            partidaId = $"{contexto.Jogo.Id}:{contexto.Porta}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(sufixoPartida))
+        {
+            partidaId += ":" + sufixoPartida;
+        }
+
+        return PontuacaoService.RegistrarPartidaAsync(
+            contexto.IdAluno,
+            contexto.Jogo.Id,
+            contexto.Jogo.Nome,
+            partidaId,
+            pontos,
+            contexto.Jogo.PontosMaximosPorPartida,
+            estrelas,
+            contexto.SalaId,
+            detalhes);
+    }
 }

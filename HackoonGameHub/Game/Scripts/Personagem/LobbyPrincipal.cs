@@ -87,6 +87,7 @@ public partial class LobbyPrincipal : Node2D
 	private bool _onlineVisivel;
 	private bool _onlineFixo;
 	private float _timerOnline;
+	private string _onlineSignature = string.Empty;
 
 	private readonly List<Jogo> _jogos = new();
 	private List<AlunoOnline> _alunosConectados = new();
@@ -253,6 +254,20 @@ public partial class LobbyPrincipal : Node2D
 			else if (extra.StartsWith("--lobby-online") || extra.StartsWith("--lobby-jogos"))
 			{
 				ExecutarComAtraso(LerAtraso(extra), MostrarOnlineFixo);
+			}
+			else if (extra.StartsWith("--lobby-jogo="))
+			{
+				string id = extra.Substring("--lobby-jogo=".Length);
+				GameInfo? info = GameRegistry.PorId(id);
+
+				if (info != null)
+				{
+					ExecutarComAtraso(0, () => AbrirJogoDoCatalogo(info));
+				}
+				else
+				{
+					GD.PrintErr($"[JOGO] Jogo \"{id}\" não existe no catálogo.");
+				}
 			}
 			else if (extra.StartsWith("--lobby-perto-casa"))
 			{
@@ -857,6 +872,9 @@ public partial class LobbyPrincipal : Node2D
 			return;
 		}
 
+		_onlineFixo = false;
+		EsconderOnline();
+
 		string nomePorta = info.Nome;
 
 		int porta = CriarServidorInterno();
@@ -867,10 +885,11 @@ public partial class LobbyPrincipal : Node2D
 			return;
 		}
 
+		int? idAluno = _session?.usuario?.id;
 		var jogo = new Jogo(
 			nomePorta,
 			_session?.sala?.id ?? (_session?.salaId > 0 ? _session.salaId : null),
-			_session?.usuario?.id,
+			idAluno,
 			_session?.playerName ?? "Jogador",
 			MeuIp(),
 			porta,
@@ -885,8 +904,11 @@ public partial class LobbyPrincipal : Node2D
 		}
 		else
 		{
-			// O servidor do lobby divulga a porta para toda a sala.
-			RpcId(1, nameof(RequisitarJogo), jogo.nome, porta, jogo.host_ip, info.Id);
+			// O servidor do lobby divulga a porta para toda a sala. O id da
+			// conta e o id da partida vão junto para o convidado conseguir
+			// salvar o próprio placar e manter a mesma partida.
+			RpcId(1, nameof(RequisitarJogo), jogo.nome, porta, jogo.host_ip,
+				info.Id, idAluno ?? 0, jogo.partidaId);
 		}
 
 		_ = RegistrarJogoNoBanco(jogo);
@@ -950,13 +972,20 @@ public partial class LobbyPrincipal : Node2D
 			Jogador = _session?.playerName ?? "Jogador",
 			Nick = _session?.playerNick ?? string.Empty,
 			Sala = _session?.roomName ?? string.Empty,
-			SalaId = _session?.salaId ?? 0,
+			SalaId = _session?.sala?.id ?? _session?.salaId ?? 0,
+			PartidaId = _jogoConectado?.partidaId ?? string.Empty,
+			// O id vem da conta LOCAL. A porta guarda o id de quem a abriu,
+			// que não é necessariamente o aluno que está jogando agora.
+			IdAluno = (_session?.usuario as Aluno)?.id ?? 0,
 			Sair = () => _gameOverlay.Fechar(),
 			Avisar = mensagem => SetStatus(mensagem)
 		};
 
 		TravarPersonagem(true);
 		_gameOverlay.Abrir(info, jogo, contexto);
+
+		GD.Print($"[JOGO] Abrindo {info.Id} na porta {porta} • aluno {contexto.IdAluno} " +
+				 $"• partida {contexto.PartidaId}.");
 	}
 
 	/// <summary>
@@ -1457,7 +1486,7 @@ public partial class LobbyPrincipal : Node2D
 
 		_onlineVisivel = true;
 		_onlineOverlay.Visible = true;
-		AtualizarOnline();
+		AtualizarOnline(true);
 	}
 
 	private void EsconderOnline()
@@ -1508,14 +1537,12 @@ public partial class LobbyPrincipal : Node2D
 		}
 	}
 
-	private void AtualizarOnline()
+	private void AtualizarOnline(bool forcar = false)
 	{
 		if (_onlineList == null)
 		{
 			return;
 		}
-
-		LimparFilhos(_onlineList);
 
 		List<Personagem> alunos = _playersRoot.GetChildren()
 			.OfType<Personagem>()
@@ -1523,17 +1550,203 @@ public partial class LobbyPrincipal : Node2D
 			.ThenBy(p => p.Name.ToString())
 			.ToList();
 
+		string assinatura = MontarAssinaturaOnline(alunos);
+
+		// As listas são reconstruídas só quando algo muda de verdade. Isso
+		// evita destruir um botão no meio de um clique a cada atualização.
+		if (!forcar && assinatura == _onlineSignature)
+		{
+			return;
+		}
+
+		_onlineSignature = assinatura;
+		LimparFilhos(_onlineList);
+
 		if (_onlineTitle != null)
 		{
-			_onlineTitle.Text = alunos.Count == 1
-				? "ALUNOS ONLINE • 1"
-				: $"ALUNOS ONLINE • {alunos.Count}";
+			_onlineTitle.Text = $"JOGOS E ALUNOS • {_jogos.Count} JOGO(S) • {alunos.Count} ONLINE";
 		}
+
+		AdicionarProgressoNoHud();
+		AdicionarJogosNoHud();
+		AdicionarAlunosNoHud(alunos);
+	}
+
+	private string MontarAssinaturaOnline(List<Personagem> alunos)
+	{
+		var texto = new StringBuilder();
+
+		foreach (Jogo jogo in _jogos.OrderBy(j => j.porta))
+		{
+			texto.Append(jogo.porta).Append('|')
+				.Append(jogo.gameKey).Append('|')
+				.Append(jogo.jogadores).Append('|')
+				.Append(jogo.status).Append('|')
+				.Append(jogo.placar).Append(';');
+		}
+
+		texto.Append("alunos:");
+
+		foreach (Personagem aluno in alunos)
+		{
+			texto.Append(aluno.Name).Append('|')
+				.Append(aluno.PlayerName).Append('|')
+				.Append(aluno.PlayerNick).Append('|')
+				.Append(aluno.SyncColor.ToHtml()).Append(';');
+		}
+
+		if (_session?.usuario is Aluno eu)
+		{
+			texto.Append("progresso:")
+				.Append(eu.points).Append('|')
+				.Append(eu.level).Append('|')
+				.Append(eu.xp).Append('|')
+				.Append(eu.stars).Append(';');
+		}
+
+		texto.Append("partida:")
+			.Append(_minhaPortaJogo).Append('|')
+			.Append(_jogoConectado?.porta ?? 0).Append('|')
+			.Append(_gameOverlay.Aberto);
+
+		return texto.ToString();
+	}
+
+	/// <summary>Cartão com os pontos/nível/estrelas da conta local.</summary>
+	private void AdicionarProgressoNoHud()
+	{
+		if (_session?.usuario is Aluno aluno)
+		{
+			var cartao = UIHelpers.Cartao(UIHelpers.EstiloCartao(
+				new Color(0.12f, 0.15f, 0.21f),
+				UIHelpers.Amarelo,
+				12, 9));
+
+			var linha = UIHelpers.Linha(12);
+			var textos = UIHelpers.Coluna(1);
+			textos.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+
+			textos.AddChild(UIHelpers.Texto("SEU PROGRESSO", 13));
+			textos.AddChild(UIHelpers.Texto(
+				$"Nível {aluno.level}  •  {aluno.points} pontos  •  ⭐ {aluno.stars}", 17));
+			textos.AddChild(UIHelpers.TextoSuaveLabel(
+				$"XP {aluno.xp} / {aluno.XpParaProximoNivel()} para o próximo nível", 12));
+
+			linha.AddChild(textos);
+
+			Label nick = UIHelpers.TextoSuaveLabel("@" + (aluno.username ?? "aluno"), 12);
+			nick.VerticalAlignment = VerticalAlignment.Center;
+			linha.AddChild(nick);
+
+			cartao.AddChild(linha);
+			_onlineList.AddChild(cartao);
+			return;
+		}
+
+		var aviso = UIHelpers.Cartao();
+		Label texto = UIHelpers.TextoSuaveLabel(
+			"Convidado: jogue normalmente, mas entre com uma conta para salvar pontos e níveis.", 12);
+		texto.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+		aviso.AddChild(texto);
+		_onlineList.AddChild(aviso);
+	}
+
+	/// <summary>
+	/// Lista o catálogo do Hub no Tab. Cada jogo mostra se há uma porta
+	/// aberta e o botão certo: ENTRAR quando existe partida, ABRIR PORTA
+	/// quando ainda não existe.
+	/// </summary>
+	private void AdicionarJogosNoHud()
+	{
+		_onlineList.AddChild(UIHelpers.TituloSecao("JOGOS DO HUB", 16));
+
+		bool emJogo = _gameOverlay.Aberto || _apiJogo != null;
+
+		foreach (GameInfo info in GameRegistry.Jogos)
+		{
+			List<Jogo> portas = _jogos
+				.Where(j => j.gameKey == info.Id &&
+							!string.Equals(j.status, "ENCERRADO", StringComparison.OrdinalIgnoreCase))
+				.OrderByDescending(j => j.jogadores)
+				.ThenBy(j => j.porta)
+				.ToList();
+
+			Jogo? minhaPorta = portas.FirstOrDefault(j =>
+				(_minhaPortaJogo > 0 && j.porta == _minhaPortaJogo) ||
+				(_jogoConectado != null && j.porta == _jogoConectado.porta));
+
+			Jogo? portaLivre = portas.FirstOrDefault(j =>
+				minhaPorta == null || j.porta != minhaPorta.porta);
+
+			var cartao = UIHelpers.Cartao();
+			var linha = UIHelpers.Linha(10);
+
+			var textos = UIHelpers.Coluna(1);
+			textos.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+
+			Label titulo = UIHelpers.Texto($"{info.Emblema}  {info.Nome}", 16);
+			titulo.AddThemeColorOverride("font_color", info.Cor.Lightened(0.2f));
+			textos.AddChild(titulo);
+
+			Label descricao = UIHelpers.TextoSuaveLabel(info.Descricao, 11);
+			descricao.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+			textos.AddChild(descricao);
+
+			string estado;
+			if (portas.Count == 0)
+			{
+				estado = $"{info.Categoria} • sem porta aberta";
+			}
+			else
+			{
+				int jogadores = portas.Sum(j => Math.Max(1, j.jogadores));
+				estado = $"{info.Categoria} • {portas.Count} porta(s) • {jogadores} jogador(es)";
+			}
+
+			textos.AddChild(UIHelpers.TextoSuaveLabel(estado, 11));
+			linha.AddChild(textos);
+
+			var acao = new Button
+			{
+				FocusMode = Control.FocusModeEnum.None,
+				CustomMinimumSize = new Vector2(112, 0)
+			};
+			acao.AddThemeFontSizeOverride("font_size", 12);
+
+			if (minhaPorta != null)
+			{
+				acao.Text = "SUA PORTA";
+				acao.Disabled = true;
+			}
+			else if (portaLivre != null)
+			{
+				acao.Text = "ENTRAR";
+				Jogo alvo = portaLivre;
+				acao.Disabled = emJogo ||
+					(info.MaxJogadores > 0 && portaLivre.jogadores >= info.MaxJogadores);
+				acao.Pressed += () => EntrarNoJogo(alvo);
+			}
+			else
+			{
+				acao.Text = "ABRIR PORTA";
+				acao.Disabled = emJogo || !GameRegistry.CenaExiste(info);
+				acao.Pressed += () => AbrirJogoDoCatalogo(info);
+			}
+
+			linha.AddChild(acao);
+			cartao.AddChild(linha);
+			_onlineList.AddChild(cartao);
+		}
+	}
+
+	private void AdicionarAlunosNoHud(List<Personagem> alunos)
+	{
+		_onlineList.AddChild(UIHelpers.TituloSecao($"ALUNOS NA SALA • {alunos.Count}", 16));
 
 		if (alunos.Count == 0)
 		{
 			_onlineList.AddChild(UIHelpers.TextoSuaveLabel(
-				"Nenhum aluno conectado ainda.", 16));
+				"Nenhum aluno conectado ainda.", 14));
 			return;
 		}
 
@@ -1667,7 +1880,8 @@ public partial class LobbyPrincipal : Node2D
 	/// <summary>Aluno pede para abrir uma porta (o servidor do lobby divulga).</summary>
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false,
 		TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequisitarJogo(string nome, int porta, string ip, string gameKey)
+	private void RequisitarJogo(string nome, int porta, string ip, string gameKey,
+		int idAluno, string partidaId)
 	{
 		if (!Multiplayer.IsServer())
 		{
@@ -1680,11 +1894,16 @@ public partial class LobbyPrincipal : Node2D
 		var jogo = new Jogo(
 			string.IsNullOrWhiteSpace(nome) ? $"Jogo de {criador}" : nome,
 			_session?.sala?.id ?? (_session?.salaId > 0 ? _session.salaId : null),
-			null,
+			idAluno > 0 ? idAluno : null,
 			criador,
 			string.IsNullOrWhiteSpace(ip) ? ObterIpDoPeer(remetente) : ip,
 			porta,
-			gameKey);
+			gameKey)
+		{
+			partidaId = string.IsNullOrWhiteSpace(partidaId)
+				? Guid.NewGuid().ToString("N")
+				: partidaId
+		};
 
 		// Um jogo por aluno: a porta anterior é substituída.
 		_jogos.RemoveAll(j => j.criador == criador);
@@ -1751,6 +1970,12 @@ public partial class LobbyPrincipal : Node2D
 		}
 
 		AtualizarListaJogos();
+		_onlineSignature = string.Empty;
+
+		if (_onlineVisivel)
+		{
+			AtualizarOnline(true);
+		}
 
 		GD.Print($"[JOGO] Lista de jogos recebida: {_jogos.Count} jogo(s).");
 	}
@@ -1771,8 +1996,27 @@ public partial class LobbyPrincipal : Node2D
 			return;
 		}
 
+		if (info.MaxJogadores > 0 && jogo.jogadores >= info.MaxJogadores)
+		{
+			_jogoStatus.Text = $"A porta de {info.Nome} já está cheia ({info.MaxJogadores} jogadores).";
+			return;
+		}
+
+		if (string.Equals(jogo.status, "ENCERRADO", StringComparison.OrdinalIgnoreCase))
+		{
+			_jogoStatus.Text = "Esta porta já foi encerrada.";
+			return;
+		}
+
+		_onlineFixo = false;
+		EsconderOnline();
+
+		string ip = string.IsNullOrWhiteSpace(jogo.host_ip)
+			? (_session?.lobbyIp ?? "127.0.0.1")
+			: jogo.host_ip;
+
 		var peer = new ENetMultiplayerPeer();
-		Error erro = peer.CreateClient(jogo.host_ip, jogo.porta);
+		Error erro = peer.CreateClient(ip, jogo.porta);
 
 		if (erro != Error.Ok)
 		{
@@ -1793,7 +2037,7 @@ public partial class LobbyPrincipal : Node2D
 		_placarJogoAtual = string.Empty;
 
 		_jogoStatus.Text = $"Entrando na porta {jogo.porta} • {info.Nome} • criada por {jogo.criador}.";
-		GD.Print($"[JOGO] Conectando em {jogo.host_ip}:{jogo.porta} ({info.Id}).");
+		GD.Print($"[JOGO] Conectando em {ip}:{jogo.porta} ({info.Id}, partida {jogo.partidaId}).");
 
 		AbrirCenaDoJogo(info, jogo.porta, souHost: false);
 	}
@@ -1891,6 +2135,40 @@ public partial class LobbyPrincipal : Node2D
 		}
 
 		AtualizarListaJogos();
+		_onlineSignature = string.Empty;
+		AtualizarProgressoAluno();
+	}
+
+	/// <summary>
+	/// Recarrega do banco os pontos/nível/estrelas do aluno local. Chamado
+	/// quando uma partida fecha, para o Tab mostrar o progresso novo.
+	/// </summary>
+	private async void AtualizarProgressoAluno()
+	{
+		if (_session?.usuario is not Aluno aluno || aluno.id <= 0)
+		{
+			return;
+		}
+
+		try
+		{
+			Aluno? atualizado = await PontuacaoService.ObterProgressoAsync(aluno.id);
+
+			if (atualizado != null && IsInstanceValid(this))
+			{
+				_session.usuario = atualizado;
+				_onlineSignature = string.Empty;
+
+				if (_onlineVisivel)
+				{
+					AtualizarOnline(true);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr("[PONTOS] Não foi possível atualizar o progresso no HUD: " + e.Message);
+		}
 	}
 
 	private void AtualizarListaJogos()
@@ -1957,6 +2235,8 @@ public partial class LobbyPrincipal : Node2D
 				? "1 partida aberta. Vá até a casinha e pressione E para entrar."
 				: $"{_jogos.Count} partidas abertas. Vá até uma casinha e pressione E.";
 		}
+
+		_onlineSignature = string.Empty;
 	}
 
 	private static void LimparFilhos(Node pai)
@@ -2025,8 +2305,8 @@ public partial class LobbyPrincipal : Node2D
 
 		_hintLabel.Visible = true;
 		_hintLabel.Text = professor
-			? "Tab: alunos online"
-			: "WASD para andar  •  Tab: alunos online  •  E: entrar na casinha";
+			? "Tab: alunos online e jogos"
+			: "WASD para andar  •  Tab: alunos online e jogos  •  E: entrar na casinha";
 
 		_interactPrompt.Visible = false;
 		_casaProxima = null;
@@ -2178,7 +2458,7 @@ public partial class LobbyPrincipal : Node2D
 		{
 			_timerOnline += (float)delta;
 
-			if (_timerOnline >= 0.4f)
+			if (_timerOnline >= 1.0f)
 			{
 				_timerOnline = 0f;
 				AtualizarOnline();

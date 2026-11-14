@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 namespace Models;
@@ -45,13 +45,19 @@ public class Aluno : Usuario
         this.username = username;
     }
 
-    private int GetXpToNextLevel()
+    /// <summary>XP necessário para passar do nível atual para o próximo.</summary>
+    public int XpParaProximoNivel()
     {
         return 100 + (level * 25); //Balanceamento de XP com base no LVL
     }
 
     public void AddXp(int amount)
     {
+        if (amount <= 0)
+        {
+            return;
+        }
+
         if (level >= 99)
         {
             level = 99;
@@ -61,9 +67,9 @@ public class Aluno : Usuario
 
         xp += amount;
 
-        while (xp >= GetXpToNextLevel()) //Metodo cap de XP
+        while (xp >= XpParaProximoNivel()) //Metodo cap de XP
         {
-            xp -= GetXpToNextLevel();
+            xp -= XpParaProximoNivel();
             level++;
 
             if (level >= 99)
@@ -73,5 +79,63 @@ public class Aluno : Usuario
                 break;
             }
         }
+    }
+
+    /// <summary>
+    /// Acumula os pontos conquistados na missão (placar) e dispara a regra de
+    /// negócio que converte XP em nível.
+    /// </summary>
+    public void AdicionarPontos(int pontos)
+    {
+        RegistrarRecompensa(pontos, 0);
+    }
+
+    /// <summary>
+    /// Aplica a recompensa de uma partida (pontos + estrelas) e devolve um
+    /// retrato do antes/depois. É a regra de domínio compartilhada pelo
+    /// <c>PontuacaoService</c> e pelo repositório transacional.
+    /// </summary>
+    public ResultadoPontuacao RegistrarRecompensa(int pontos, int estrelas)
+    {
+        var resultado = new ResultadoPontuacao
+        {
+            AlunoId = id,
+            PontosTotais = points,
+            EstrelasTotais = stars,
+            NivelAnterior = level,
+            NivelNovo = level,
+            XpAtual = xp,
+            XpProximoNivel = XpParaProximoNivel()
+        };
+
+        pontos = Math.Max(0, pontos);
+        estrelas = Math.Clamp(estrelas, 0, 3);
+
+        if (pontos > 0)
+        {
+            points += pontos;
+            AddXp(pontos);
+        }
+
+        if (estrelas > 0)
+        {
+            stars += estrelas;
+        }
+
+        resultado.Salvo = true;
+        resultado.PontosGanhos = pontos;
+        resultado.EstrelasGanhas = estrelas;
+        resultado.PontosTotais = points;
+        resultado.EstrelasTotais = stars;
+        resultado.NivelNovo = level;
+        resultado.XpAtual = xp;
+        resultado.XpProximoNivel = XpParaProximoNivel();
+
+        if (resultado.SubiuNivel)
+        {
+            resultado.Mensagem = $"Você subiu para o nível {level}!";
+        }
+
+        return resultado;
     }
 }

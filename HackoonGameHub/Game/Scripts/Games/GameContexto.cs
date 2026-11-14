@@ -31,6 +31,15 @@ public sealed class GameContexto
     /// <summary>Sala do banco (0 quando o jogador entrou como convidado).</summary>
     public int SalaId { get; init; }
 
+    /// <summary>
+    /// Identificador único da partida/porta. O sistema de pontos usa esse id
+    /// para não salvar a mesma partida duas vezes.
+    /// </summary>
+    public string PartidaId { get; init; } = string.Empty;
+
+    /// <summary>Id da conta do aluno (0 quando entrou como convidado).</summary>
+    public int IdAluno { get; init; }
+
     /// <summary>Chamado pelo jogo quando o jogador quer sair da partida.</summary>
     public Action? Sair { get; init; }
 

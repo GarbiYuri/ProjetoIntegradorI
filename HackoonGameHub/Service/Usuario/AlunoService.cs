@@ -279,4 +279,20 @@ public class AlunoService
 
         await AlunoDB.VincularSala(alunoId, salaId);
     }
+
+    /// <summary>
+    /// Compatibilidade com chamadas antigas: encaminha para o fluxo oficial
+    /// de pontos (<see cref="PontuacaoService"/>), que grava histórico,
+    /// aplica estrelas/XP/nível e evita pontuação duplicada.
+    /// </summary>
+    public static async Task GanharPontosAsync(int alunoId, int pontos)
+    {
+        await PontuacaoService.RegistrarPartidaAsync(
+            alunoId,
+            jogoKey: "legado",
+            jogoNome: "Pontuação",
+            partidaId: $"legado:{Guid.NewGuid():N}",
+            pontos: pontos,
+            pontosMaximos: 100);
+    }
 }

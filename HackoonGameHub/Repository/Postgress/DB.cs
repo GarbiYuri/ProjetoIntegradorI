@@ -549,10 +549,43 @@ public class DB
             created_at timestamp
         );
 
+        -- Tabela de Pontuações (histórico de partidas do Hub)
+        -- Cada linha é o recibo de uma partida; a combinação
+        -- (aluno, partida) é única para impedir pontuação duplicada.
+        CREATE TABLE IF NOT EXISTS pontuacoes (
+            id SERIAL primary key,
+            aluno_id INTEGER NOT NULL references alunos(id) on delete cascade,
+            jogo_key varchar(64) not null,
+            jogo_nome varchar(255) not null,
+            partida_id varchar(120) not null,
+            id_sala INTEGER references salas(id) on delete set null,
+            pontos INTEGER NOT NULL DEFAULT 0,
+            estrelas INTEGER NOT NULL DEFAULT 0,
+            xp_ganho INTEGER NOT NULL DEFAULT 0,
+            nivel_anterior INTEGER NOT NULL DEFAULT 1,
+            nivel_novo INTEGER NOT NULL DEFAULT 1,
+            detalhes text,
+            created_at timestamp NOT NULL DEFAULT NOW(),
+            CONSTRAINT pontuacoes_aluno_partida_unica UNIQUE (aluno_id, partida_id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_pontuacoes_aluno ON pontuacoes (aluno_id);
+        CREATE INDEX IF NOT EXISTS idx_pontuacoes_jogo ON pontuacoes (jogo_key);
+        CREATE INDEX IF NOT EXISTS idx_pontuacoes_sala ON pontuacoes (id_sala);
+
         -- Bancos já existentes: acrescenta as colunas novas sem perder dados.
         ALTER TABLE jogos ADD COLUMN IF NOT EXISTS game_key varchar(64) DEFAULT 'custom';
         ALTER TABLE jogos ADD COLUMN IF NOT EXISTS players INTEGER DEFAULT 1;
         ALTER TABLE jogos ADD COLUMN IF NOT EXISTS score text;
+        ALTER TABLE alunos ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0;
+        ALTER TABLE alunos ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1;
+        ALTER TABLE alunos ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0;
+        ALTER TABLE alunos ADD COLUMN IF NOT EXISTS stars INTEGER DEFAULT 0;
+
+        UPDATE alunos SET points = COALESCE(points, 0),
+                          level = COALESCE(level, 1),
+                          xp = COALESCE(xp, 0),
+                          stars = COALESCE(stars, 0);
     ");
 
         await cmd.ExecuteNonQueryAsync();
